@@ -1,0 +1,58 @@
+# MLflow Configuration
+mlflow:
+  experiment_name: "price_predictor_california_housing"
+  tracking_uri: "file:./mlruns"
+  
+# Data Configuration
+data:
+  test_size: 0.2
+  val_size: 0.2
+  random_state: 42
+  
+# Model Configuration
+models:
+  random_forest:
+    name: "RandomForestRegressor"
+    hyperparameters:
+      n_estimators: [10, 200]
+      max_depth: [5, 20]
+      min_samples_split: [2, 10]
+  
+  lightgbm:
+    name: "LightGBMRegressor"
+    hyperparameters:
+      n_estimators: [10, 200]
+      max_depth: [3, 10]
+      learning_rate: [0.01, 0.3]
+  
+  linear_regression:
+    name: "LinearRegression"
+    hyperparameters:
+      fit_intercept: [True, False]
+      copy_X: [True, False]
+      positive: [True, False]
+
+# Optuna Configuration
+optuna:
+  n_trials: 50
+  study_name: "price_predictor_optimization"
+  direction: "minimize"
+  
+# Streamlit Configuration
+streamlit:
+  title: "🏠 Price Predictor - California Housing"
+  description: "Predicción de precios de viviendas usando Machine Learning"
+  
+# Features Configuration
+features:
+  target: "MedHouseVal"
+  numerical:
+    - "MedInc"      # median income in block group
+    - "HouseAge"    # median house age in block group
+    - "AveRooms"    # average number of rooms per household
+    - "AveBedrms"   # average number of bedrooms per household
+    - "Population"  # block group population
+    - "AveOccup"    # average number of household members
+    - "Latitude"    # block group latitude
+    - "Longitude"   # block group longitude
+  categorical: []

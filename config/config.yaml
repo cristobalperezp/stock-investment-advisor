@@ -1,0 +1,68 @@
+# News Summarizer Configuration
+api:
+  openai_api_key: "${OPENAI_API_KEY}"
+  news_api_key: "${NEWS_API_KEY}"
+  
+data_sources:
+  yahoo_finance:
+    enabled: true
+    timeout: 30
+  
+  news_api:
+    enabled: true
+    base_url: "https://newsapi.org/v2"
+    timeout: 30
+    sources: ["bloomberg", "reuters", "financial-times", "the-wall-street-journal"]
+  
+  chilean_sources:
+    enabled: true
+    sources:
+      - name: "El Mercurio Inversiones"
+        url: "https://www.elmercurio.com/inversiones"
+      - name: "La Tercera Pulso"
+        url: "https://www.latercera.com/pulso/"
+      - name: "Diario Financiero"
+        url: "https://www.df.cl/"
+
+stock_market:
+  santiago_exchange:
+    symbol_suffix: ".SN"
+    timezone: "America/Santiago"
+    trading_hours:
+      open: "09:30"
+      close: "16:00"
+  
+  top_stocks:
+    # Principales empresas chilenas
+    - "SQM-B.SN"    # SQM
+    - "FALABELLA.SN" # Falabella
+    - "CENCOSUD.SN"  # Cencosud
+    - "COPEC.SN"     # Copec
+    - "CCU.SN"       # CCU
+    - "CHILE.SN"     # Banco de Chile
+    - "BSANTANDER.SN" # Santander
+    - "ENELCHILE.SN" # Enel Chile
+    - "COLBUN.SN"    # Colbún
+    - "AGUAS-A.SN"   # Aguas Andinas
+
+analysis:
+  sentiment:
+    model: "gpt-3.5-turbo"
+    temperature: 0.3
+  
+  summary:
+    model: "gpt-3.5-turbo"
+    max_tokens: 500
+    temperature: 0.5
+
+ui:
+  streamlit:
+    theme: "light"
+    layout: "wide"
+    sidebar_state: "expanded"
+    server_port: 8501
+  
+  fastapi:
+    host: "0.0.0.0"
+    port: 8000
+    reload: true
