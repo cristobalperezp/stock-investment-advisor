@@ -282,20 +282,34 @@ def main():
     print("🤖 SISTEMA DE ANÁLISIS AUTOMATIZADO")
     print("=" * 60)
     
-    # Verificar si es el primer día hábil del mes
-    if not is_first_business_day():
-        print(f"📅 Hoy no es el primer día hábil del mes. Saliendo...")
-        print(f"   Fecha actual: {datetime.now().strftime('%d/%m/%Y - %A')}")
-        return
+    # Verificar si se debe forzar ejecución (para testing o ejecución manual)
+    force_run = os.getenv('FORCE_RUN', 'false').lower() == 'true'
+    github_workflow = os.getenv('GITHUB_ACTIONS', 'false').lower() == 'true'
     
-    print(f"🎯 Es primer día hábil del mes. Ejecutando análisis...")
+    if force_run or github_workflow:
+        print("🔧 Ejecución forzada detectada:")
+        print(f"   - FORCE_RUN: {force_run}")
+        print(f"   - GitHub Actions: {github_workflow}")
+        print("   - Omitiendo verificación de fecha")
+        print("🎯 Ejecutando análisis...")
+    else:
+        # Verificar si es primer día hábil (solo para ejecuciones locales)
+        if not is_first_business_day():
+            print("📅 Hoy no es el primer día hábil del mes. Saliendo...")
+            print(f"   Fecha actual: {datetime.now().strftime('%d/%m/%Y - %A')}")
+            print("   💡 Para ejecutar manualmente, use:")
+            print(f"   FORCE_RUN=true python {__file__}")
+            return
+        
+        print("🎯 Es primer día hábil del mes. Ejecutando análisis...")
     
     try:
         # 1. Ejecutar análisis
         result, config = run_monthly_analysis()
         
         # 2. Generar reporte
-        report_content, report_filename = generate_monthly_report(result, config)
+        report_content, report_filename = generate_monthly_report(
+            result, config)
         
         # 3. Enviar por email
         email_sent = send_email_report(report_content, report_filename)
@@ -307,13 +321,15 @@ def main():
         print("\n" + "=" * 60)
         print("✅ PROCESO COMPLETADO EXITOSAMENTE")
         print("=" * 60)
-        print(f"📊 Empresas analizadas: {result['market_summary']['total_empresas']}")
-        print(f"🎯 Recomendaciones: {result['recommendations']['empresas_recomendadas']}")
+        print(f"📊 Empresas analizadas: "
+              f"{result['market_summary']['total_empresas']}")
+        print(f"🎯 Recomendaciones: "
+              f"{result['recommendations']['empresas_recomendadas']}")
         print(f"📧 Email enviado: {'Sí' if email_sent else 'No'}")
         print(f"⏰ Tiempo: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
         
     except Exception as e:
-        print(f"\n❌ ERROR CRÍTICO EN EL PROCESO:")
+        print("\n❌ ERROR CRÍTICO EN EL PROCESO:")
         print(f"   {str(e)}")
         print("\nDetalles para debugging:")
         import traceback

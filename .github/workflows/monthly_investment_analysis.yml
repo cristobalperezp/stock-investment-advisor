@@ -38,6 +38,7 @@ jobs:
         
     - name: 📊 Ejecutar análisis mensual
       env:
+        FORCE_RUN: ${{ github.event.inputs.force_run || 'true' }}
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
         SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -54,3 +55,4 @@ jobs:
         echo "## 📊 Análisis de Inversión Completado" >> $GITHUB_STEP_SUMMARY
         echo "**Fecha:** $(date)" >> $GITHUB_STEP_SUMMARY
         echo "**Estado:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Ejecución forzada:** ${{ github.event.inputs.force_run || 'auto' }}" >> $GITHUB_STEP_SUMMARY
