@@ -1,5 +1,5 @@
 """
-News Summarizer - Análisis inteligente del mercado bursátil chileno
+Stock Investment Advisor - Análisis inteligente del mercado bursátil chileno
 
 Este paquete contiene todos los módulos necesarios para:
 - Extracción de datos financieros y noticias

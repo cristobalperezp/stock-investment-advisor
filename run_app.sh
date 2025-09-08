@@ -1,7 +1,7 @@
 #!/bin/bash
-# Script para lanzar la aplicación Streamlit del News Summarizer
+# Script para lanzar la aplicación Streamlit del Stock Investment Advisor
 
-echo "🚀 Iniciando News Summarizer - Mercado Chileno..."
+echo "🚀 Iniciando Stock Investment Advisor - Mercado Chileno..."
 echo "📊 Dashboard interactivo disponible en: http://localhost:8501"
 echo ""
 

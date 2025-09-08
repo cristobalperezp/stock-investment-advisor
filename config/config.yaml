@@ -1,4 +1,4 @@
-# News Summarizer Configuration
+# Stock Investment Advisor Configuration
 api:
   openai_api_key: "${OPENAI_API_KEY}"
   news_api_key: "${NEWS_API_KEY}"

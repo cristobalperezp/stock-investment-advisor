@@ -5,6 +5,7 @@ Incluye configuración avanzada y análisis detallado
 
 import streamlit as st
 import sys
+import time
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -22,6 +23,23 @@ def show_advanced_analytics():
     st.title("🔬 Análisis Avanzado")
     
     extractor = YahooFinanceDataExtractor()
+    
+    # Información del caché
+    # with st.expander("📋 Estado del Sistema de Caché"):
+    #     cache_info = extractor.get_cache_info()
+    #     col1, col2, col3 = st.columns(3)
+        
+    #     with col1:
+    #         st.metric("Archivos en Caché", cache_info.get('total_files', 0))
+    #     with col2:
+    #         st.metric("Tamaño Total", f"{cache_info.get('total_size_mb', 0):.1f} MB")
+    #     with col3:
+    #         st.metric("Directorio", cache_info.get('cache_directory', 'N/A'))
+        
+        # if cache_info.get('files'):
+        #     st.write("**Archivos de caché recientes:**")
+        #     for file_info in cache_info['files'][:5]:
+        #         st.write(f"• {file_info['filename']} ({file_info['size_mb']:.1f} MB) - {file_info['modified']}")
     
     # Selector de múltiples acciones
     stock_options = {
@@ -107,11 +125,32 @@ def show_market_overview():
     
     extractor = YahooFinanceDataExtractor()
     
-    # Obtener datos del mercado
-    with st.spinner("Actualizando datos del mercado..."):
+    # Información del caché en la parte superior
+    # with st.expander("⚡ Información de Rendimiento"):
+    #     cache_info = extractor.get_cache_info()
+    #     st.info(f"💾 **Sistema de Caché Activo** - Datos reutilizados del día actual para mayor velocidad")
+        
+    #     col1, col2 = st.columns(2)
+    #     with col1:
+    #         st.write(f"📁 Archivos: {cache_info.get('total_files', 0)}")
+    #         st.write(f"💽 Tamaño: {cache_info.get('total_size_mb', 0):.1f} MB")
+    #     with col2:
+    #         st.write(f"🕒 Última actualización automática cada día")
+    #         st.write(f"🧹 Limpieza automática después de 7 días")
+    
+    # Obtener datos del mercado (usando caché)
+    with st.spinner("Cargando datos del mercado..."):
+        start_time = time.time()
         market_summary = extractor.get_market_summary()
         current_prices = extractor.get_current_prices()
         sector_performance = extractor.get_sector_performance()
+        load_time = time.time() - start_time
+        
+        # Mostrar tiempo de carga
+        if load_time < 1.0:
+            st.success(f"⚡ Datos cargados en {load_time:.3f} segundos")
+        else:
+            st.info(f"📡 Datos descargados en {load_time:.1f} segundos")
     
     # Métricas principales
     col1, col2, col3, col4 = st.columns(4)

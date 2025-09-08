@@ -1,6 +1,6 @@
 # Tests
 
-Esta carpeta contiene las pruebas y scripts de verificación para el proyecto News Summarizer.
+Esta carpeta contiene las pruebas y scripts de verificación para el proyecto Stock Investment Advisor.
 
 ## Archivos de Prueba
 

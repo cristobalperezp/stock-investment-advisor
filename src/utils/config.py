@@ -1,5 +1,5 @@
 """
-Módulo de configuración para el News Summarizer
+Módulo de configuración para el Stock Investment Advisor
 Maneja la carga de configuraciones desde archivos YAML y variables de entorno
 """
 

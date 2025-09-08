@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de verificación rápida para el News Summarizer
+Script de verificación rápida para el Stock Investment Advisor
 Verifica que todos los componentes estén funcionando correctamente
 """
 
@@ -119,7 +119,7 @@ def check_files():
 
 def main():
     """Función principal de verificación"""
-    print("🚀 VERIFICACIÓN DEL SISTEMA - News Summarizer")
+    print("🚀 VERIFICACIÓN DEL SISTEMA - Stock Investment Advisor")
     print("=" * 50)
     
     # Verificar imports

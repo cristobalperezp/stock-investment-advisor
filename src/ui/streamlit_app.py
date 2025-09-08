@@ -1,5 +1,5 @@
 """
-Aplicación principal de Streamlit para el News Summarizer
+Aplicación principal de Streamlit para el Stock Investment Advisor
 Dashboard interactivo para análisis del mercado chileno con tickers personalizados
 """
 
@@ -20,10 +20,11 @@ sys.path.append(str(src_path))
 from data_sources.yahoo_finance import YahooFinanceDataExtractor
 from utils.config import get_config
 from ui.pages import PAGES, show_advanced_analytics, show_market_overview, show_settings
+from ui.investment_page import show_investment_analysis
 
 # Configuración de la página
 st.set_page_config(
-    page_title="News Summarizer - Mercado Chileno",
+    page_title="Stock Investment Advisor - Mercado Chileno",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -331,7 +332,7 @@ def main():
     
     # Header principal
     st.markdown(
-        '<h1 class="main-header">📈 News Summarizer - Mercado Chileno</h1>',
+        '<h1 class="main-header">📈 Stock Investment Advisor - Mercado Chileno</h1>',
         unsafe_allow_html=True
     )
     
@@ -339,7 +340,8 @@ def main():
     st.sidebar.header("🧭 Navegación")
     page_options = [
         "📊 Dashboard Principal",
-        "🔬 Análisis Avanzado",
+        "💼 Análisis de Inversión",
+        "📈 Análisis Avanzado",
         "🏛️ Resumen del Mercado",
         "⚙️ Configuración"
     ]
@@ -418,7 +420,10 @@ def main():
                     st.rerun()
     
     # Mostrar página seleccionada
-    if selected_page == "🔬 Análisis Avanzado":
+    if selected_page == "💼 Análisis de Inversión":
+        show_investment_analysis()
+        return
+    elif selected_page == "📈 Análisis Avanzado":
         show_advanced_analytics()
         return
     elif selected_page == "🏛️ Resumen del Mercado":
@@ -670,7 +675,7 @@ def main():
     # Footer
     st.markdown("---")
     st.markdown(
-        "📊 **News Summarizer** - Análisis del Mercado Chileno | "
+        "📊 **Stock Investment Advisor** - Análisis del Mercado Chileno | "
         "Datos proporcionados por Yahoo Finance"
     )
 
