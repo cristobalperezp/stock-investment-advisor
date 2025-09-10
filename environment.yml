@@ -3,25 +3,47 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.12
+  - python=3.12.3
   - pip
+  - numpy=1.26.4
+  - pandas=2.3.2
+  - matplotlib=3.9.0
+  - scikit-learn=1.5.0
+  - plotly=6.3.0
+  - seaborn=0.13.2
+  - pyyaml=6.0.2
+  - requests=2.32.2
   - pip:
+    # Web Frameworks
     - fastapi>=0.116.0
     - uvicorn>=0.34.0
-    - streamlit>=1.49.0
-    - yfinance>=0.2.65
-    - requests>=2.32.0
-    - python-dotenv>=1.1.0
-    - openai>=1.84.0
-    - pandas>=2.3.0
-    - numpy>=1.26.0
+    - streamlit==1.49.1
+    
+    # Financial Data & APIs
+    - yfinance==0.2.65
+    - httpx==0.28.1
+    
+    # Environment & Configuration
+    - python-dotenv==1.1.0
+    
+    # AI/ML APIs
+    - openai==1.84.0
+    
+    # Data Processing
     - beautifulsoup4>=4.13.0
     - aiohttp>=3.11.0
-    - matplotlib>=3.9.0
-    - plotly>=6.3.0
-    - joblib>=1.4.0
-    - scikit-learn>=1.5.0
     - python-multipart>=0.0.6
+    - openpyxl==3.1.4
+    - joblib==1.4.2
+    
+    # PDF Generation
+    - reportlab==4.4.0
+    - fpdf2==2.8.4
+    
+    # Template Engine
     - jinja2>=3.1.2
-    - pyyaml>=6.0.0
+    
+    # Utilities
     - pathlib>=1.0.0
+    - python-dateutil>=2.8.2
+    - pydantic==2.11.5

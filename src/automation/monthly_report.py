@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 """
-Automatización mensual para análisis de inversión y envío por email
-Se ejecuta el primer día hábil de cada mes
+Automatización de análisis mensual de inversiones
+Genera reporte mensual automático del mercado de acciones chileno
 """
 
 import os
@@ -8,17 +9,24 @@ import sys
 import smtplib
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 import pandas as pd
 
-# Agregar src al path
-src_path = Path(__file__).parent.parent
-sys.path.append(str(src_path))
+# Importaciones para PDF
+from fpdf import FPDF
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
+# Agregar el directorio src al path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+# Importar módulos locales
 from analysis.investment_analyzer import InvestmentAnalyzer
 from analysis.report_generator import generate_investment_report
 from utils.config import get_config
@@ -26,16 +34,16 @@ from utils.config import get_config
 
 def is_first_business_day():
     """Verifica si hoy es el primer día hábil del mes"""
-    today = datetime.now()
+    today = datetime.now().date()
     
-    # Obtener primer día del mes
-    first_day = datetime(today.year, today.month, 1)
+    # Obtener el primer día del mes
+    first_day = today.replace(day=1)
     
-    # Buscar primer día hábil (lunes=0, domingo=6)
-    while first_day.weekday() > 4:  # Si es sábado (5) o domingo (6)
+    # Encontrar el primer día hábil (lunes a viernes)
+    while first_day.weekday() > 4:  # 0=lunes, 6=domingo
         first_day += timedelta(days=1)
     
-    return today.date() == first_day.date()
+    return today == first_day
 
 
 def run_monthly_analysis():
@@ -68,114 +76,288 @@ def run_monthly_analysis():
         raise
 
 
+def generate_monthly_report_pdf(result, config):
+    """Genera reporte mensual en formato PDF profesional"""
+    print("📄 Generando reporte PDF profesional...")
+    
+    try:
+        # Asegurar que existe el directorio outputs/reports
+        output_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'outputs', 'reports')
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Nombre del archivo PDF con ruta completa
+        pdf_filename = f"reporte_mensual_{datetime.now().strftime('%Y_%m')}.pdf"
+        pdf_path = os.path.join(output_dir, pdf_filename)
+        
+        # Crear documento PDF
+        doc = SimpleDocTemplate(
+            pdf_path,
+            pagesize=A4,
+            topMargin=0.5*inch,
+            bottomMargin=0.5*inch,
+            leftMargin=0.5*inch,
+            rightMargin=0.5*inch
+        )
+        
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Title'],
+            fontSize=20,
+            spaceAfter=30,
+            textColor=colors.darkblue,
+            alignment=1  # Centrado
+        )
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading1'],
+            fontSize=14,
+            spaceAfter=12,
+            textColor=colors.darkred,
+            leftIndent=0
+        )
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=6,
+            leftIndent=10
+        )
+        
+        # Contenido del documento
+        story = []
+        
+        # Título principal
+        title = "REPORTE MENSUAL DE INVERSION"
+        subtitle = f"{datetime.now().strftime('%B %Y').upper()}"
+        story.append(Paragraph(title, title_style))
+        story.append(Paragraph(subtitle, title_style))
+        story.append(Spacer(1, 20))
+        
+        # Resumen ejecutivo
+        story.append(Paragraph("RESUMEN EJECUTIVO", heading_style))
+        
+        # Crear párrafos separados para mejor renderizado
+        story.append(Paragraph(f"<b>Fecha del analisis:</b> {datetime.now().strftime('%d/%m/%Y')}", normal_style))
+        story.append(Paragraph(f"<b>Presupuesto analizado:</b> ${config['budget']:,} CLP", normal_style))
+        story.append(Paragraph(f"<b>Perfil de riesgo:</b> {config['risk_level'].title()}", normal_style))
+        story.append(Paragraph(f"<b>Total de empresas analizadas:</b> {result['market_summary']['total_empresas']}", normal_style))
+        story.append(Paragraph(f"<b>Empresas recomendadas:</b> {result['recommendations']['empresas_recomendadas']}", normal_style))
+        story.append(Spacer(1, 15))
+        
+        # Análisis con IA
+        story.append(Paragraph("ANALISIS INTELIGENTE", heading_style))
+        
+        if 'gpt_analysis' in result and result['gpt_analysis']:
+            # Procesar y dividir el contenido en párrafos separados
+            gpt_text = result['gpt_analysis']
+            # Limpiar markdown y emojis
+            gpt_text = gpt_text.replace('### ', '').replace('##', '').replace('#', '')
+            gpt_text = gpt_text.replace('📊', '').replace('📈', '').replace('💹', '')
+            gpt_text = gpt_text.replace('�', '').replace('⚖️', '').replace('💎', '')
+            gpt_text = gpt_text.replace('🎯', '').replace('*', '').replace('**', '')
+            
+            # Dividir en líneas y procesar cada una
+            lines = gpt_text.split('\n')
+            clean_lines = []
+            for line in lines:
+                line = line.strip()
+                if line and len(line) > 3:  # Solo líneas con contenido
+                    clean_lines.append(line)
+            
+            # Crear párrafo de análisis IA
+            story.append(Paragraph("<b>ANALISIS REALIZADO CON INTELIGENCIA ARTIFICIAL</b>", normal_style))
+            story.append(Spacer(1, 8))
+            
+            # Agregar cada línea como párrafo separado
+            for line in clean_lines[:8]:  # Limitar a 8 líneas principales
+                if line:
+                    story.append(Paragraph(line, normal_style))
+                    story.append(Spacer(1, 4))
+            
+            # Distribución
+            gpt_dist = result['gpt_distribution']
+            gpt_dist = gpt_dist.replace('### ', '').replace('##', '').replace('#', '')
+            gpt_dist = gpt_dist.replace('*', '')
+            
+            story.append(Spacer(1, 10))
+            story.append(Paragraph("<b>DISTRIBUCION RECOMENDADA POR IA:</b>", normal_style))
+            story.append(Spacer(1, 6))
+            
+            dist_lines = gpt_dist.split('\n')
+            for line in dist_lines[:6]:  # Primeras 6 líneas de distribución
+                line = line.strip()
+                if line and len(line) > 2:
+                    story.append(Paragraph(line, normal_style))
+                    story.append(Spacer(1, 3))
+                    
+        else:
+            story.append(Paragraph("<b>ANALISIS IA NO DISPONIBLE</b>", normal_style))
+            story.append(Spacer(1, 8))
+            story.append(Paragraph("Para habilitar analisis con IA, configure OPENAI_API_KEY", normal_style))
+            story.append(Spacer(1, 4))
+            story.append(Paragraph("Se utilizo analisis automatico basado en metricas cuantitativas", normal_style))
+        
+        story.append(Spacer(1, 15))
+        
+        # Top 10 Recomendaciones
+        story.append(Paragraph("TOP 10 RECOMENDACIONES", heading_style))
+        
+        # Crear tabla para recomendaciones
+        data = [['#', 'Empresa', 'Sector', 'Inversion (CLP)', '%', 'Score']]
+        
+        for i, company in enumerate(result['recommendations']['distribucion'][:10], 1):
+            data.append([
+                str(i),
+                f"{company['Empresa']}\n({company['Ticker']})",
+                company['Sector'],
+                f"${company['Monto_Inversion']:,}",
+                f"{company['Porcentaje_Recomendado']:.1f}%",
+                f"{company['Puntaje']:.3f}"
+            ])
+        
+        table = Table(data, colWidths=[0.5*inch, 2*inch, 1.5*inch, 1.3*inch, 0.7*inch, 0.7*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightgrey),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        story.append(table)
+        story.append(Spacer(1, 15))
+        
+        # Distribución por sectores
+        story.append(Paragraph("DISTRIBUCION POR SECTORES", heading_style))
+        
+        sectores_data = [['Sector', 'Inversion (CLP)', 'Porcentaje']]
+        for sector, data_sector in result['recommendations']['resumen_sectores'].items():
+            sectores_data.append([
+                sector,
+                f"${data_sector['Monto_Inversion']:,}",
+                f"{data_sector['Porcentaje_Recomendado']:.1f}%"
+            ])
+        
+        sectores_table = Table(sectores_data, colWidths=[2.5*inch, 2*inch, 1.5*inch])
+        sectores_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.darkred),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.lightcyan),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ]))
+        story.append(sectores_table)
+        story.append(Spacer(1, 15))
+        
+        # Estado del mercado
+        story.append(Paragraph("ESTADO DEL MERCADO CHILENO", heading_style))
+        
+        # Crear párrafos separados para mejor renderizado
+        story.append(Paragraph(f"<b>Precio promedio de acciones:</b> ${result['market_summary']['precio_promedio']:.2f}", normal_style))
+        story.append(Paragraph(f"<b>Variacion promedio ultimos 6 meses:</b> {result['market_summary']['variacion_promedio_6m']:.2f}%", normal_style))
+        story.append(Paragraph(f"<b>Dividend yield promedio:</b> {result['market_summary']['dividend_yield_promedio']:.2f}%", normal_style))
+        story.append(Paragraph(f"<b>Empresas con dividendos:</b> {result['market_summary']['empresas_con_dividendos']}", normal_style))
+        story.append(Spacer(1, 10))
+        
+        # Top performers
+        story.append(Paragraph("MEJORES PERFORMERS (6 meses):", heading_style))
+        for i, performer in enumerate(result['market_summary']['top_performers_6m'][:5], 1):
+            story.append(Paragraph(f"{i}. <b>{performer['Empresa']}</b>: {performer['Variacion_6M']*100:.1f}%", normal_style))
+        story.append(Spacer(1, 10))
+        
+        # Mejores dividendos
+        story.append(Paragraph("MEJORES DIVIDENDOS:", heading_style))
+        for i, dividend in enumerate(result['market_summary']['mejores_dividendos'][:5], 1):
+            story.append(Paragraph(f"{i}. <b>{dividend['Empresa']}</b>: {dividend['Dividend_Yield']*100:.2f}%", normal_style))
+        story.append(Spacer(1, 20))
+        
+        # Disclaimer
+        disclaimer_style = ParagraphStyle(
+            'Disclaimer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.gray,
+            leftIndent=10,
+            rightIndent=10,
+            borderColor=colors.gray,
+            borderWidth=1,
+            borderPadding=10
+        )
+        
+        # Disclaimer
+        disclaimer_style = ParagraphStyle(
+            'Disclaimer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.gray,
+            leftIndent=10,
+            rightIndent=10,
+            borderColor=colors.gray,
+            borderWidth=1,
+            borderPadding=10
+        )
+        
+        story.append(Spacer(1, 20))
+        story.append(Paragraph("<b>IMPORTANTE - DISCLAIMER:</b>", disclaimer_style))
+        story.append(Paragraph("Este analisis es generado automaticamente con fines informativos unicamente.", disclaimer_style))
+        story.append(Paragraph("No constituye asesoria financiera profesional. Los datos se basan en informacion", disclaimer_style))
+        story.append(Paragraph("historica y pueden no reflejar condiciones futuras del mercado. Se recomienda", disclaimer_style))
+        story.append(Paragraph("consultar con un asesor financiero antes de tomar decisiones de inversion.", disclaimer_style))
+        story.append(Spacer(1, 8))
+        story.append(Paragraph(f"Reporte generado automaticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}", disclaimer_style))
+        story.append(Paragraph("Sistema de Analisis Automatizado - Stock Investment Advisor", disclaimer_style))
+        
+        # Construir PDF
+        doc.build(story)
+        
+        print(f"✅ Reporte PDF generado: {pdf_filename}")
+        print(f"📂 Ubicación: {pdf_path}")
+        return pdf_path
+        
+    except Exception as e:
+        print(f"❌ Error generando PDF: {str(e)}")
+        print("Detalles del error:")
+        import traceback
+        traceback.print_exc()
+        raise
+        raise
+
+
 def generate_monthly_report(result, config):
     """Genera reporte mensual completo"""
     print("📄 Generando reporte mensual...")
     
     try:
-        # Generar reporte con gráficos
-        report = generate_investment_report(
-            result['fundamental_data'],
-            result['recommendations'],
-            result['market_summary']
-        )
+        # Generar PDF directamente
+        pdf_filename = generate_monthly_report_pdf(result, config)
         
-        # Crear reporte en texto
+        # Crear contenido de texto simple para el email
         report_content = f"""
-        REPORTE MENSUAL DE INVERSIÓN - {datetime.now().strftime('%B %Y').upper()}
-        ================================================================
+REPORTE MENSUAL DE INVERSIÓN - {datetime.now().strftime('%B %Y').upper()}
 
-        📊 RESUMEN EJECUTIVO
-        - Fecha del análisis: {datetime.now().strftime('%d/%m/%Y')}
-        - Presupuesto analizado: ${config['budget']:,} CLP
-        - Perfil de riesgo: {config['risk_level'].title()}
-        - Total de empresas analizadas: {result['market_summary']['total_empresas']}
-        - Empresas recomendadas: {result['recommendations']['empresas_recomendadas']}
+📊 RESUMEN EJECUTIVO:
+- Fecha: {datetime.now().strftime('%d/%m/%Y')}
+- Presupuesto: ${config['budget']:,} CLP
+- Perfil de riesgo: {config['risk_level'].title()}
+- Empresas analizadas: {result['market_summary']['total_empresas']}
+- Recomendaciones: {result['recommendations']['empresas_recomendadas']}
 
-        🤖 ANÁLISIS INTELIGENTE CON IA
-        {'=' * 40}
+El análisis completo se encuentra en el archivo PDF adjunto.
+
+Sistema de Análisis Automatizado - Stock Investment Advisor
         """
         
-        # Incluir análisis GPT si está disponible
-        if 'gpt_analysis' in result and result['gpt_analysis']:
-            report_content += f"""
-            ✅ ANÁLISIS REALIZADO CON INTELIGENCIA ARTIFICIAL
-
-            {result['gpt_analysis']}
-
-            � DISTRIBUCIÓN RECOMENDADA POR IA:
-            {result['gpt_distribution']}
-
-            """
-        else:
-            report_content += """
-            ⚠️ ANÁLISIS IA NO DISPONIBLE
-            - Para habilitar análisis con IA, configure OPENAI_API_KEY
-            - Se utilizó análisis automático basado en métricas cuantitativas
-            """
-        
-        report_content += f"""
-        �💰 TOP 10 RECOMENDACIONES DE INVERSIÓN (ANÁLISIS AUTOMÁTICO):
-        """
-        
-        # Top 10 recomendaciones
-        for i, company in enumerate(result['recommendations']['distribucion'][:10], 1):
-            report_content += f"""
-            {i:2d}. {company['Empresa']} ({company['Ticker']})
-                • Sector: {company['Sector']}
-                • Inversión sugerida: ${company['Monto_Inversion']:,} CLP ({company['Porcentaje_Recomendado']:.2f}%)
-                • Score de análisis: {company['Puntaje']:.4f}
-            """
-        
-        # Distribución por sectores
-        report_content += f"""
-        🏢 DISTRIBUCIÓN POR SECTORES:
-        """
-        for sector, data in result['recommendations']['resumen_sectores'].items():
-            report_content += f"• {sector}: ${data['Monto_Inversion']:,} CLP ({data['Porcentaje_Recomendado']:.1f}%)\n"
-        
-        # Métricas del mercado
-        report_content += f"""
-        📈 ESTADO DEL MERCADO CHILENO:
-        • Precio promedio de acciones: ${result['market_summary']['precio_promedio']:.2f}
-        • Variación promedio últimos 6 meses: {result['market_summary']['variacion_promedio_6m']:.2f}%
-        • Dividend yield promedio: {result['market_summary']['dividend_yield_promedio']:.2f}%
-        • Empresas con dividendos: {result['market_summary']['empresas_con_dividendos']}
-
-        🏆 MEJORES PERFORMERS (6 meses):
-        """
-        
-        for i, performer in enumerate(result['market_summary']['top_performers_6m'][:5], 1):
-            report_content += f"{i}. {performer['Empresa']}: {performer['Variacion_6M']*100:.1f}%\n"
-        
-        report_content += f"""
-        💎 MEJORES DIVIDENDOS:
-        """
-        
-        for i, dividend in enumerate(result['market_summary']['mejores_dividendos'][:5], 1):
-            report_content += f"{i}. {dividend['Empresa']}: {dividend['Dividend_Yield']*100:.2f}%\n"
-        
-        # Disclaimer
-        report_content += f"""
-        ⚠️  IMPORTANTE - DISCLAIMER:
-        Este análisis es generado automáticamente con fines informativos únicamente.
-        No constituye asesoría financiera profesional. Los datos se basan en información
-        histórica y pueden no reflejar condiciones futuras del mercado. Se recomienda
-        consultar con un asesor financiero antes de tomar decisiones de inversión.
-
-        ---
-        Reporte generado automáticamente el {datetime.now().strftime('%d/%m/%Y a las %H:%M')}
-        Sistema de Análisis Automatizado - Stock Investment Advisor
-        """
-        
-        # Guardar reporte
-        report_filename = f"reporte_mensual_{datetime.now().strftime('%Y_%m')}.txt"
-        with open(report_filename, 'w', encoding='utf-8') as f:
-            f.write(report_content)
-        
-        print(f"✅ Reporte guardado: {report_filename}")
-        
-        return report_content, report_filename
+        return report_content, pdf_filename
         
     except Exception as e:
         print(f"❌ Error generando reporte: {str(e)}")
@@ -207,35 +389,39 @@ def send_email_report(report_content, report_filename):
         message = MIMEMultipart()
         message['From'] = sender_email
         message['To'] = recipient_email
-        message['Subject'] = f"📊 Reporte Mensual de Inversión - {datetime.now().strftime('%B %Y')}"
+        message['Subject'] = (
+            f"📊 Reporte Mensual de Inversión - "
+            f"{datetime.now().strftime('%B %Y')}"
+        )
         
         # Cuerpo del email
         body = f"""
-        Estimado/a inversionista,
+Estimado/a inversionista,
 
-        Se ha generado el reporte mensual de análisis de inversión para el mercado chileno.
+Se ha generado el reporte mensual de análisis de inversión para el 
+mercado chileno.
 
-        📅 Fecha: {datetime.now().strftime('%d de %B de %Y')}
-        🎯 Análisis: Mercado de acciones chileno
-        💰 Presupuesto base: $5.000.000 CLP
+Fecha: {datetime.now().strftime('%d de %B de %Y')}
+Análisis: Mercado de acciones chileno
+Presupuesto base: ${200000:,} CLP
 
-        Encuentra el reporte completo en el archivo adjunto.
+Encuentra el reporte completo en formato PDF adjunto con:
+• Análisis detallado de todas las empresas del mercado
+• Top 10 recomendaciones de inversión
+• Distribución sugerida por sectores
+• Métricas clave del mercado
+• Análisis con Inteligencia Artificial (si está habilitada)
 
-        Highlights del mes:
-        • Total de empresas analizadas en el mercado chileno
-        • Recomendaciones de inversión basadas en análisis fundamental
-        • Distribución sugerida por sectores
-        • Métricas clave del mercado
+Recordatorio: Este análisis es generado automáticamente y tiene 
+fines informativos únicamente.
 
-        ⚠️ Recordatorio: Este análisis es generado automáticamente y tiene fines informativos únicamente.
-
-        Saludos,
-        Sistema Automatizado de Análisis de Inversión
+Saludos,
+Sistema Automatizado de Análisis de Inversión
         """
         
         message.attach(MIMEText(body, 'plain'))
         
-        # Adjuntar archivo de reporte
+        # Adjuntar archivo de reporte PDF
         try:
             with open(report_filename, 'rb') as attachment:
                 part = MIMEBase('application', 'octet-stream')
@@ -244,25 +430,45 @@ def send_email_report(report_content, report_filename):
             encoders.encode_base64(part)
             part.add_header(
                 'Content-Disposition',
-                f'attachment; filename= {report_filename}'
+                f'attachment; filename={report_filename}'
             )
             message.attach(part)
         except FileNotFoundError:
             print(f"⚠️  Archivo de reporte no encontrado: {report_filename}")
         
-        # Enviar email
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        text = message.as_string()
-        server.sendmail(sender_email, recipient_email, text)
-        server.quit()
-        
-        print(f"✅ Email enviado exitosamente a {recipient_email}")
-        return True
+        # Enviar email con manejo de errores específico para Gmail
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            
+            # Debug información de conexión
+            print(f"🔗 Conectando a: {smtp_server}:{smtp_port}")
+            print(f"👤 Usuario: {sender_email}")
+            print("🔑 Intentando autenticación...")
+            
+            server.login(sender_email, sender_password)
+            
+            text = message.as_string()
+            server.sendmail(sender_email, recipient_email, text)
+            server.quit()
+            
+            print(f"✅ Email enviado exitosamente a {recipient_email}")
+            return True
+            
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"❌ Error de autenticación SMTP: {str(e)}")
+            print("💡 Para Gmail, asegúrate de:")
+            print("   1. Tener 2FA activado en tu cuenta")
+            print("   2. Usar App Password en lugar de tu contraseña normal")
+            print("   3. Generar App Password en: https://myaccount.google.com/apppasswords")
+            print("   4. Usar esa contraseña en SENDER_PASSWORD")
+            return False
         
     except Exception as e:
         print(f"❌ Error enviando email: {str(e)}")
+        print("Detalles del error:")
+        import traceback
+        traceback.print_exc()
         return False
 
 
