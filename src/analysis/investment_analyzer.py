@@ -776,11 +776,11 @@ Máximo 350 tokens."""
             
             client = OpenAI(api_key=api_key)
             
-            # Crear prompt para GPT
+            # Crear prompt para GPT con instrucciones MÁS ESTRICTAS
             task_prompt = f"""
             Eres un asesor financiero especializado en inversiones en la bolsa chilena.
 
-            Distribuye el presupuesto basándote en:
+            Distribuye EXACTAMENTE el presupuesto basándote en:
 
             Informe Financiero:
             {gpt_analysis}
@@ -788,23 +788,24 @@ Máximo 350 tokens."""
             Distribución de Pesos:
             {portfolio_weights.to_string()}
 
-            Presupuesto: ${budget:,}
+            Presupuesto EXACTO: ${budget:,}
 
             Formato de respuesta:
             ### Distribución de Inversión
             - Empresa 1: $ [dinero]
             - Empresa 2: $ [dinero]
             ...
-            TOTAL: [suma total]
+            TOTAL: ${budget:,}
 
             ### Justificación de Inversión
             - [justificación corta]
 
-            IMPORTANTE:
+            REGLAS ESTRICTAS:
+            - El TOTAL debe ser EXACTAMENTE ${budget:,}
             - Mínimo 8 empresas en portafolio
             - Inversión mínima por empresa: $20,000
             - Múltiplos de $1,000
-            - Maximizar retornos y dividendos
+            - Verificar que la suma sea exacta antes de responder
             - Diversificación entre sectores
             - Máximo 400 tokens
             """
@@ -816,11 +817,215 @@ Máximo 350 tokens."""
                 temperature=0.7
             )
             
-            return completion.choices[0].message.content
+            gpt_response = completion.choices[0].message.content
+            
+            # NUEVA FUNCIONALIDAD: Validar y corregir la suma automáticamente
+            corrected_response = self._validate_and_fix_gpt_budget(gpt_response, budget)
+            
+            return corrected_response
             
         except Exception as e:
             logger.error(f"Error en asesoría GPT: {str(e)}")
             return self._generate_fallback_distribution(portfolio_weights, budget)
+    
+    def _validate_and_fix_gpt_budget(self, gpt_response: str, target_budget: int) -> str:
+        """
+        Valida y corrige automáticamente la distribución de GPT para que sume exactamente el presupuesto
+        """
+        import re
+        
+        try:
+            # Extraer las líneas con inversiones usando regex
+            investment_lines = []
+            lines = gpt_response.split('\n')
+            
+            for line in lines:
+                # Buscar líneas con formato: "- Empresa: $cantidad"
+                match = re.search(r'- (.+?):\s*\$\s*([\d,]+)', line)
+                if match:
+                    company = match.group(1).strip()
+                    amount_str = match.group(2).replace(',', '')
+                    try:
+                        amount = int(amount_str)
+                        investment_lines.append({
+                            'company': company, 
+                            'amount': amount, 
+                            'original_line': line
+                        })
+                    except ValueError:
+                        continue
+            
+            if not investment_lines:
+                logger.warning("No se pudieron extraer inversiones del GPT")
+                return gpt_response
+            
+            # Calcular suma actual
+            current_total = sum([inv['amount'] for inv in investment_lines])
+            
+            if current_total == target_budget:
+                # Ya está correcto
+                return gpt_response
+            
+            # Necesita corrección
+            logger.info(f"Corrigiendo distribución GPT: ${current_total:,} -> ${target_budget:,}")
+            
+            # Calcular factor de corrección
+            correction_factor = target_budget / current_total
+            
+            # Aplicar corrección proporcional
+            corrected_investments = []
+            running_total = 0
+            
+            for i, inv in enumerate(investment_lines):
+                if i == len(investment_lines) - 1:
+                    # Última empresa: ajustar para que la suma sea exacta
+                    corrected_amount = target_budget - running_total
+                else:
+                    # Empresas anteriores: aplicar factor proporcional y redondear
+                    corrected_amount = int((inv['amount'] * correction_factor) / 1000) * 1000
+                    corrected_amount = max(corrected_amount, 20000)  # Mínimo $20,000
+                
+                corrected_investments.append({
+                    'company': inv['company'],
+                    'amount': corrected_amount
+                })
+                running_total += corrected_amount
+            
+            # Regenerar el texto corregido
+            corrected_response = gpt_response
+            
+            # Reemplazar las líneas de inversión
+            for inv, corrected_inv in zip(investment_lines, corrected_investments):
+                old_line = inv['original_line']
+                new_line = f"- {corrected_inv['company']}: ${corrected_inv['amount']:,}"
+                corrected_response = corrected_response.replace(old_line, new_line)
+            
+            # Actualizar la línea TOTAL
+            total_pattern = re.compile(r'TOTAL:\s*\$[\d,]+')
+            corrected_response = total_pattern.sub(f'TOTAL: ${target_budget:,}', corrected_response)
+            
+            logger.info(f"✅ Distribución corregida: ${sum([c['amount'] for c in corrected_investments]):,}")
+            
+            return corrected_response
+            
+        except Exception as e:
+            logger.error(f"Error corrigiendo distribución GPT: {e}")
+            return gpt_response
+    
+    def _sync_recommendations_with_gpt(self, original_recommendations: Dict, 
+                                      gpt_distribution: str, budget: int) -> Dict:
+        """
+        Sincroniza las recomendaciones con la distribución GPT para consistencia
+        """
+        import re
+        
+        try:
+            # Extraer inversiones de la distribución GPT
+            gpt_investments = []
+            lines = gpt_distribution.split('\n')
+            
+            for line in lines:
+                match = re.search(r'- (.+?):\s*\$\s*([\d,]+)', line)
+                if match:
+                    company_name = match.group(1).strip()
+                    amount_str = match.group(2).replace(',', '')
+                    try:
+                        amount = int(amount_str)
+                        gpt_investments.append({
+                            'company_name': company_name,
+                            'amount': amount
+                        })
+                    except ValueError:
+                        continue
+            
+            if not gpt_investments:
+                logger.warning("No se pudieron extraer inversiones GPT")
+                return None
+            
+            # Crear nueva distribución basada en GPT
+            new_distribution = []
+            total_gpt = sum([inv['amount'] for inv in gpt_investments])
+            
+            # Mapear empresas GPT a datos originales
+            original_companies = {item['Empresa']: item for item in original_recommendations['distribucion']}
+            used_companies = set()  # Para evitar duplicados
+            
+            for gpt_inv in gpt_investments:
+                # Buscar empresa correspondiente (fuzzy matching mejorado)
+                matched_company = None
+                gpt_name = gpt_inv['company_name'].upper().strip()
+                
+                # Buscar coincidencia exacta primero
+                for orig_name, orig_data in original_companies.items():
+                    if orig_name in used_companies:
+                        continue  # Ya fue usada
+                        
+                    orig_name_clean = orig_name.upper().strip()
+                    
+                    # Matching más preciso
+                    if (orig_name_clean == gpt_name or
+                        gpt_name in orig_name_clean or 
+                        orig_name_clean in gpt_name):
+                        matched_company = orig_data
+                        used_companies.add(orig_name)
+                        break
+                
+                # Si no encuentra match exacto, buscar por palabras clave
+                if not matched_company:
+                    for orig_name, orig_data in original_companies.items():
+                        if orig_name in used_companies:
+                            continue
+                            
+                        orig_name_clean = orig_name.upper().strip()
+                        gpt_words = [w for w in gpt_name.split() if len(w) > 3]
+                        
+                        if any(word in orig_name_clean for word in gpt_words):
+                            matched_company = orig_data
+                            used_companies.add(orig_name)
+                            break
+                
+                if matched_company:
+                    # Actualizar con datos GPT pero mantener estructura original
+                    updated_company = matched_company.copy()
+                    updated_company['Monto_Inversion'] = gpt_inv['amount']
+                    updated_company['Porcentaje_Recomendado'] = (gpt_inv['amount'] / total_gpt) * 100
+                    new_distribution.append(updated_company)
+                else:
+                    logger.warning(f"No se encontró match para empresa GPT: {gpt_inv['company_name']}")
+            
+            if len(new_distribution) == 0:
+                logger.warning("No se pudo mapear ninguna empresa GPT")
+                return None
+            
+            # Recalcular resumen de sectores
+            new_sector_summary = {}
+            for company in new_distribution:
+                sector = company['Sector']
+                if sector not in new_sector_summary:
+                    new_sector_summary[sector] = {
+                        'Monto_Inversion': 0,
+                        'Porcentaje_Recomendado': 0
+                    }
+                new_sector_summary[sector]['Monto_Inversion'] += company['Monto_Inversion']
+                new_sector_summary[sector]['Porcentaje_Recomendado'] += company['Porcentaje_Recomendado']
+            
+            # Crear nueva estructura de recomendaciones
+            synced_recommendations = original_recommendations.copy()
+            synced_recommendations.update({
+                'total_invertido': total_gpt,
+                'empresas_recomendadas': len(new_distribution),
+                'distribucion': new_distribution,
+                'resumen_sectores': new_sector_summary
+            })
+            
+            logger.info(f"Sincronización GPT: {len(new_distribution)} empresas, ${total_gpt:,} total")
+            return synced_recommendations
+            
+        except Exception as e:
+            logger.error(f"Error sincronizando con GPT: {e}")
+            return None
+    
+    
     
     def _generate_fallback_analysis(self, df_fundamentals: pd.DataFrame) -> str:
         """Genera análisis básico cuando GPT no está disponible"""
@@ -1014,7 +1219,16 @@ Máximo 350 tokens."""
             self.portfolio_weights = top_portfolio_weights
             recommendations = self.generate_investment_recommendations(budget)
             
-            # 7. Generar resumen del mercado (con todas las acciones para contexto)
+            # 7. NUEVO: Parsear distribución GPT y actualizar recomendaciones
+            if gpt_distribution and not gpt_distribution.startswith('### Distribución de Inversión (Automatizada)'):
+                updated_recommendations = self._sync_recommendations_with_gpt(
+                    recommendations, gpt_distribution, budget
+                )
+                if updated_recommendations:
+                    recommendations = updated_recommendations
+                    logger.info("✅ Recomendaciones sincronizadas con distribución GPT")
+            
+            # 8. Generar resumen del mercado (con todas las acciones para contexto)
             market_summary = self.get_market_summary(df_fundamentals)
             
             logger.info(f"Análisis completo con GPT finalizado - TOP {top_stocks_count} acciones seleccionadas")
