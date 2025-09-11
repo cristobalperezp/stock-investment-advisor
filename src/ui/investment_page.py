@@ -602,6 +602,27 @@ def show_data_tables(result):
         lambda x: f"{x:.4f}"
     )
     
+    # Explicación del Score
+    st.info("""
+    **📊 ¿Qué significa el Score?**
+    
+    El **Score** es un puntaje normalizado (0.0 - 1.0) que evalúa cada empresa basándose en múltiples factores fundamentales:
+    
+    - **📈 ROE (Rentabilidad sobre Patrimonio)**: 15% del puntaje
+    - **💰 P/E Ratio (Precio/Ganancias)**: 10% del puntaje  
+    - **📊 Crecimiento de Ingresos**: 10% del puntaje
+    - **💎 Dividend Yield**: 15% del puntaje
+    - **🏦 Cash Flow vs Deuda**: 15% del puntaje
+    - **📈 Variaciones de Precio (1M y 6M)**: 5% del puntaje
+    - **⚖️ Otros factores de riesgo**: 30% del puntaje
+    
+    **🎯 Interpretación:**
+    - Score > 0.7: Empresa excelente
+    - Score 0.5-0.7: Empresa buena 
+    - Score 0.3-0.5: Empresa regular
+    - Score < 0.3: Empresa con riesgo alto
+    """)
+    
     st.dataframe(
         display_df,
         column_config={
@@ -610,7 +631,7 @@ def show_data_tables(result):
             'Sector': 'Sector',
             'Monto_Inversion': 'Inversión',
             'Porcentaje_Recomendado': 'Porcentaje',
-            'Puntaje': 'Score'
+            'Puntaje': 'Score (0.0-1.0)'
         },
         hide_index=True,
         width="stretch"

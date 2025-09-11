@@ -456,8 +456,8 @@ class InvestmentAnalyzer:
     
     def generate_investment_recommendations(self, 
                                           budget: float = 1000000,
-                                          min_companies: int = 8,
-                                          min_investment: float = 50000) -> Dict:
+                                          min_companies: int = 10,
+                                          min_investment: float = 20000) -> Dict:
         """
         Genera recomendaciones de inversión basadas en el análisis
         """
@@ -502,45 +502,94 @@ class InvestmentAnalyzer:
         # Ordenar por peso descendente
         weights = weights.sort_values('Peso_Asignado', ascending=False)
         
-        # Seleccionar top empresas (al menos min_companies)
-        top_companies = weights.head(max(min_companies, len(weights))).copy()
+        # Seleccionar top empresas basado en min_companies
+        num_companies = min(max(min_companies, 5), len(weights))  # Mínimo 5, máximo disponible
+        top_companies = weights.head(num_companies).copy()
         
-        # Calcular distribución de inversión
+        # Calcular distribución proporcional al presupuesto real
         total_weight = top_companies['Peso_Asignado'].sum()
+        
+        # Calcular porcentajes normalizados
         top_companies['Porcentaje_Recomendado'] = (
             top_companies['Peso_Asignado'] / total_weight * 100
         )
         
-        # Calcular montos de inversión
+        # Calcular montos de inversión basados en el presupuesto REAL
         top_companies['Monto_Inversion'] = (
             top_companies['Porcentaje_Recomendado'] / 100 * budget
-        ).round(-3)  # Redondear a miles
-        
-        # Asegurar que Monto_Inversion sea numérico antes de la comparación
-        top_companies['Monto_Inversion'] = pd.to_numeric(
-            top_companies['Monto_Inversion'], errors='coerce'
         )
         
-        # Ajustar inversiones mínimas
+        # Redondear a miles más cercanos
+        top_companies['Monto_Inversion'] = (
+            top_companies['Monto_Inversion'] / 1000
+        ).round() * 1000
+        
+        # Asegurar inversión mínima sin alterar el presupuesto total
         mask_low = top_companies['Monto_Inversion'] < min_investment
         if mask_low.any():
-            top_companies.loc[mask_low, 'Monto_Inversion'] = min_investment
+            # Redistribuir para mantener el presupuesto total
+            low_count = mask_low.sum()
+            high_companies = ~mask_low
             
-        # Recalcular total
-        total_invested = top_companies['Monto_Inversion'].sum()
+            if high_companies.any():
+                # Calcular déficit por inversiones bajas
+                deficit = (min_investment * low_count) - top_companies.loc[mask_low, 'Monto_Inversion'].sum()
+                remaining_budget = budget - (min_investment * low_count)
+                
+                # Asignar mínimo a las empresas bajas
+                top_companies.loc[mask_low, 'Monto_Inversion'] = min_investment
+                
+                # Redistribuir el resto proporcionalmente
+                if remaining_budget > 0 and high_companies.sum() > 0:
+                    high_weights = top_companies.loc[high_companies, 'Peso_Asignado']
+                    high_weights_normalized = high_weights / high_weights.sum()
+                    top_companies.loc[high_companies, 'Monto_Inversion'] = (
+                        high_weights_normalized * remaining_budget
+                    ).round(-3)  # Redondear a miles
         
-        # Crear resumen
+        # Ajustar para que sume exactamente el presupuesto
+        current_total = top_companies['Monto_Inversion'].sum()
+        if abs(current_total - budget) > 1:  # Si hay diferencia significativa
+            # Ajustar la inversión más grande proporcionalmente
+            max_idx = top_companies['Monto_Inversion'].idxmax()
+            adjustment = budget - current_total
+            top_companies.loc[max_idx, 'Monto_Inversion'] += adjustment
+            top_companies.loc[max_idx, 'Monto_Inversion'] = max(
+                top_companies.loc[max_idx, 'Monto_Inversion'], min_investment
+            )
+        
+        # Recalcular porcentajes finales
+        final_total = top_companies['Monto_Inversion'].sum()
+        top_companies['Porcentaje_Recomendado'] = (
+            top_companies['Monto_Inversion'] / final_total * 100
+        )
+        
+        total_invested = final_total
+        
+        # Crear resumen final con datos CORREGIDOS
         recommendations = {
             'fecha_analisis': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'presupuesto_total': budget,
             'total_invertido': total_invested,
             'empresas_recomendadas': len(top_companies),
             'distribucion': top_companies.to_dict('records'),
-            'resumen_sectores': top_companies.groupby('Sector').agg({
-                'Monto_Inversion': 'sum',
-                'Porcentaje_Recomendado': 'sum'
-            }).to_dict('index')
+            'resumen_sectores': {}
         }
+        
+        # Calcular resumen de sectores CORREGIDO
+        for _, company in top_companies.iterrows():
+            sector = company['Sector']
+            monto = company['Monto_Inversion']
+            porcentaje = company['Porcentaje_Recomendado']
+            
+            if sector not in recommendations['resumen_sectores']:
+                recommendations['resumen_sectores'][sector] = {
+                    'Monto_Inversion': 0,
+                    'Porcentaje_Recomendado': 0
+                }
+            
+            recommendations['resumen_sectores'][sector]['Monto_Inversion'] += monto
+            recommendations['resumen_sectores'][sector]['Porcentaje_Recomendado'] += porcentaje
         
         # Guardar recomendaciones
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

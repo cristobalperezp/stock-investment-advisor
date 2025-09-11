@@ -320,32 +320,41 @@ class InvestmentReportGenerator:
                              recommendations: Dict, market_summary: Dict) -> str:
         """Genera análisis textual de las recomendaciones"""
         
+        # CORREGIDO: Usar los valores corregidos del objeto recommendations
+        presupuesto_real = recommendations['presupuesto_total']
+        total_real = recommendations['total_invertido']
+        
         analysis_text = f"""## 📊 Análisis de Inversión - {datetime.now().strftime('%d/%m/%Y')}
 
 ### 🎯 Resumen Ejecutivo
 - **Total de empresas analizadas**: {market_summary['total_empresas']}
 - **Empresas con dividendos**: {market_summary['empresas_con_dividendos']}
-- **Presupuesto total**: ${recommendations['presupuesto_total']:,.0f}
-- **Total a invertir**: ${recommendations['total_invertido']:,.0f}
+- **Presupuesto total**: ${presupuesto_real:,.0f}
+- **Total a invertir**: ${total_real:,.0f}
 - **Empresas recomendadas**: {recommendations['empresas_recomendadas']}
 
 ### 💰 Top 5 Recomendaciones"""
         
-        # Top 5 recomendaciones
+        # Top 5 recomendaciones usando los valores CORREGIDOS
         for i, company in enumerate(recommendations['distribucion'][:5], 1):
+            monto_real = company['Monto_Inversion']  # Ya corregido en investment_analyzer
+            porcentaje_real = company['Porcentaje_Recomendado']  # Ya corregido
+            
             analysis_text += f"""
 
 **{i}. {company['Empresa']} ({company['Sector']})**
-- Inversión recomendada: ${company['Monto_Inversion']:,.0f} ({company['Porcentaje_Recomendado']:.1f}%)
+- Inversión recomendada: ${monto_real:,.0f} ({porcentaje_real:.1f}%)
 - Puntaje de análisis: {company['Puntaje']:.3f}"""
         
-        # Análisis por sector
+        # Análisis por sector usando valores CORREGIDOS
         analysis_text += f"""
 
 ### 🏢 Distribución por Sectores"""
         
         for sector, data in recommendations['resumen_sectores'].items():
-            analysis_text += f"\n- **{sector}**: ${data['Monto_Inversion']:,.0f} ({data['Porcentaje_Recomendado']:.1f}%)"
+            monto_sector = data['Monto_Inversion']  # Ya corregido
+            porcentaje_sector = data['Porcentaje_Recomendado']  # Ya corregido
+            analysis_text += f"\n- **{sector}**: ${monto_sector:,.0f} ({porcentaje_sector:.1f}%)"
         
         # Métricas del mercado
         analysis_text += f"""
