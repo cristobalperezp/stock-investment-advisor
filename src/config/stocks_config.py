@@ -11,7 +11,8 @@ CHILEAN_STOCKS_BY_SECTOR = {
         "BCI.SN",         # Banco de Crédito e Inversiones  
         "CHILE.SN",       # Banco de Chile
         "BICECORP.SN",     # Bice Corp
-        "ITAU.SN"         # Itaú Corpbanca
+        "ITAU.SN",         # Itaú Corpbanca
+        "BCI.SN"         # Banco de Crédito e Inversiones (repetido para asegurar inclusión)
     ],
     
     # Retail y Consumo
@@ -84,6 +85,7 @@ STOCK_NAMES = {
     "CHILE.SN": "Banco de Chile",
     "BICECORP.SN": "Bice Corp",
     "ITAU.SN": "Itaú Corpbanca",
+    "BCI.SN": "Banco de Crédito e Inversiones",  # Repetido para asegurar inclusión
     
     # Retail
     "FALABELLA.SN": "Falabella",

@@ -227,6 +227,7 @@ python check_system.py
 ### Acciones Principales (Dashboard)
 | Empresa | Símbolo | Sector | Market Cap |
 |---------|---------|--------|------------|
+| LATAM Airlines | LTM.SN | Transport | ~$15B CLP |
 | SQM | SQM-B.SN | Materials | ~$12B CLP |
 | Falabella | FALABELLA.SN | Retail | ~$8B CLP |
 | Cencosud | CENCOSUD.SN | Retail | ~$6B CLP |
@@ -235,14 +236,13 @@ python check_system.py
 | Banco de Chile | CHILE.SN | Banking | ~$11B CLP |
 | Banco Santander | BSANTANDER.SN | Banking | ~$8B CLP |
 | Enel Chile | ENELCHILE.SN | Utilities | ~$5B CLP |
-| Colbún | COLBUN.SN | Utilities | ~$3B CLP |
-| Aguas Andinas | AGUAS-A.SN | Utilities | ~$2B CLP |
+| AFP Habitat | HABITAT.SN | AFP | ~$1B CLP |
 
-### Análisis Extendido por Sectores (50+ Acciones)
+### Análisis Extendido por Sectores (20+ Acciones)
 **Configuración en `src/config/stocks_config.py`:**
-- 🏦 **Banca** (4): BSANTANDER.SN, BCI.SN, CHILE.SN, BICECORP.SN
-- 🛒 **Retail** (5): FALABELLA.SN, RIPLEY.SN, CENCOSUD.SN, FORUS.SN, SMU.SN  
-- ⚡ **Utilities** (4): ENELCHILE.SN, COLBUN.SN, AGUAS-A.SN, GASCO.SN
+- 🏦 **Banca** (5): BSANTANDER.SN, BCI.SN, CHILE.SN, BICECORP.SN, ITAU.SN
+- 🛒 **Retail** (6): FALABELLA.SN, RIPLEY.SN, CENCOSUD.SN, FORUS.SN, SMU.SN, TRICOT.SN  
+- ⚡ **Utilities** (5): ENELCHILE.SN, COLBUN.SN, AGUAS-A.SN, GASCO.SN, ECL.SN
 - 🍺 **Bebidas** (3): CCU.SN, CONCHATORO.SN, EMBONOR-B.SN
 - 🏠 **Inmobiliario** (3): PARAUCO.SN, MALLPLAZA.SN, CENCOMALLS.SN
 - 🚚 **Transporte** (1): LTM.SN
