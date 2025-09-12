@@ -10,7 +10,8 @@ CHILEAN_STOCKS_BY_SECTOR = {
         "BSANTANDER.SN",  # Banco Santander Chile
         "BCI.SN",         # Banco de Crédito e Inversiones  
         "CHILE.SN",       # Banco de Chile
-        "BICECORP.SN"     # Bice Corp
+        "BICECORP.SN",     # Bice Corp
+        "ITAU.SN"         # Itaú Corpbanca
     ],
     
     # Retail y Consumo
@@ -29,7 +30,8 @@ CHILEAN_STOCKS_BY_SECTOR = {
         "COLBUN.SN",      # Colbún
         "AGUAS-A.SN",     # Aguas Andinas
         "GASCO.SN",       # Gasco
-        "COPEC.SN"        # Copec
+        "COPEC.SN",        # Copec
+        "ECL.SN"          # Engie Chile
     ],
     
     # Embotellados y Bebidas
@@ -81,6 +83,7 @@ STOCK_NAMES = {
     "BCI.SN": "BCI - Banco de Crédito e Inversiones", 
     "CHILE.SN": "Banco de Chile",
     "BICECORP.SN": "Bice Corp",
+    "ITAU.SN": "Itaú Corpbanca",
     
     # Retail
     "FALABELLA.SN": "Falabella",
@@ -96,6 +99,7 @@ STOCK_NAMES = {
     "AGUAS-A.SN": "Aguas Andinas",
     "GASCO.SN": "Gasco",
     "COPEC.SN": "Empresas Copec",
+    "ECL.SN": "Engie Chile",
     
     # Embotellados
     "EMBONOR-B.SN": "Embotelladora Andina",

@@ -43,6 +43,7 @@ def show_advanced_analytics():
     
     # Selector de múltiples acciones
     stock_options = {
+        "LATAM Airlines": "LTM.SN",
         "SQM": "SQM-B.SN",
         "Falabella": "FALABELLA.SN", 
         "Cencosud": "CENCOSUD.SN",
@@ -50,15 +51,14 @@ def show_advanced_analytics():
         "CCU": "CCU.SN",
         "Banco de Chile": "CHILE.SN",
         "Enel Chile": "ENELCHILE.SN",
-        "Colbún": "COLBUN.SN",
-        "Aguas Andinas": "AGUAS-A.SN",
+        "AFP Habitat": "HABITAT.SN",
         "Banco Santander Chile": "BSANTANDER.SN",
     }
     
     selected_stocks = st.multiselect(
         "Selecciona acciones para comparar:",
         list(stock_options.keys()),
-        default=["SQM", "Falabella", "Banco de Chile"]
+        default=["LATAM Airlines", "SQM", "Falabella"]
     )
     
     if selected_stocks:

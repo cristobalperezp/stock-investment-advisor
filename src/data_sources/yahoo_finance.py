@@ -31,6 +31,7 @@ class YahooFinanceDataExtractor:
     
     def __init__(self):
         self.default_stocks = [
+            "LTM.SN",         # LATAM Airlines
             "SQM-B.SN",      # SQM
             "FALABELLA.SN",  # Falabella
             "CENCOSUD.SN",   # Cencosud
@@ -39,12 +40,12 @@ class YahooFinanceDataExtractor:
             "CHILE.SN",      # Banco de Chile
             "BSANTANDER.SN",  # Santander
             "ENELCHILE.SN",  # Enel Chile
-            "COLBUN.SN",     # Colbún
-            "AGUAS-A.SN"     # Aguas Andinas
+            "HABITAT.SN",   # AFP Habitat
         ]
         
         # Mapeo de símbolos a nombres
         self.stock_names = {
+            "LTM.SN": "LATAM Airlines",
             "SQM-B.SN": "SQM",
             "FALABELLA.SN": "Falabella",
             "CENCOSUD.SN": "Cencosud",
@@ -53,8 +54,7 @@ class YahooFinanceDataExtractor:
             "CHILE.SN": "Banco de Chile",
             "BSANTANDER.SN": "Santander",
             "ENELCHILE.SN": "Enel Chile",
-            "COLBUN.SN": "Colbún",
-            "AGUAS-A.SN": "Aguas Andinas"
+            "HABITAT.SN": "AFP Habitat",
         }
         
         # Configuración de caché

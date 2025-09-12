@@ -61,11 +61,11 @@ class InvestmentAnalyzer:
             # Fallback a la configuración original
             self.chilean_stocks = {
                 # Banca
-                "Banca": ["BSANTANDER.SN", "BCI.SN", "CHILE.SN", "BICECORP.SN"],
+                "Banca": ["BSANTANDER.SN", "BCI.SN", "CHILE.SN", "BICECORP.SN", "ITAU.SN"],
                 # Retail
-                "Retail": ["FALABELLA.SN", "RIPLEY.SN", "CENCOSUD.SN", "FORUS.SN", "SMU.SN"],
+                "Retail": ["FALABELLA.SN", "RIPLEY.SN", "CENCOSUD.SN", "FORUS.SN", "SMU.SN", "TRICOT.SN"],
                 # Servicios
-                "Servicios": ["ENELCHILE.SN", "COLBUN.SN", "AGUAS-A.SN", "GASCO.SN", "COPEC.SN"],
+                "Servicios": ["ENELCHILE.SN", "COLBUN.SN", "AGUAS-A.SN", "GASCO.SN", "COPEC.SN", "ECL.SN"],
                 # Embotellados
                 "Embotellados": ["EMBONOR-B.SN", "CONCHATORO.SN", "CCU.SN"],
                 # AFP

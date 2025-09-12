@@ -454,6 +454,7 @@ def main():
     
     # Selector de acción para análisis detallado
     stock_options = {
+        "LATAM Airlines": "LTM.SN",
         "SQM": "SQM-B.SN",
         "Falabella": "FALABELLA.SN",
         "Cencosud": "CENCOSUD.SN",
@@ -461,9 +462,9 @@ def main():
         "CCU": "CCU.SN",
         "Banco de Chile": "CHILE.SN",
         "Enel Chile": "ENELCHILE.SN",
-        "Colbún": "COLBUN.SN",
-        "Aguas Andinas": "AGUAS-A.SN",
+        "AFP Habitat": "HABITAT.SN",
         "Banco Santander Chile": "BSANTANDER.SN",
+
     }
     
     # Agregar tickers personalizados a las opciones
