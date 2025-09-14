@@ -1,6 +1,6 @@
 # Web Frameworks
-fastapi>=0.116.0
-uvicorn>=0.34.0
+fastapi==0.116.1
+uvicorn==0.34.2
 streamlit==1.49.1
 
 # Financial Data & APIs
@@ -21,9 +21,9 @@ numpy==1.26.4
 scikit-learn==1.5.0
 
 # Data Processing
-beautifulsoup4>=4.13.0
-aiohttp>=3.11.0
-python-multipart>=0.0.6
+beautifulsoup4==4.13.4
+aiohttp==3.11.18
+python-multipart==0.0.9
 openpyxl==3.1.4
 joblib==1.4.2
 
@@ -37,9 +37,9 @@ reportlab==4.4.0
 fpdf2==2.8.4
 
 # Template Engine
-jinja2>=3.1.2
+jinja2==3.1.4
 
 # Utilities
-pathlib>=1.0.0
-python-dateutil>=2.8.2
+pathlib==1.0.1
+python-dateutil==2.9.0.post0
 pydantic==2.11.5
