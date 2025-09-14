@@ -1,4 +1,4 @@
-name: news-summarizer
+name: stock-investment-advisor
 channels:
   - conda-forge
   - defaults
@@ -14,36 +14,23 @@ dependencies:
   - pyyaml=6.0.2
   - requests=2.32.2
   - pip:
-    # Web Frameworks
-    - fastapi>=0.116.0
-    - uvicorn>=0.34.0
+    - fastapi==0.116.1
+    - uvicorn==0.34.2
     - streamlit==1.49.1
-    
-    # Financial Data & APIs
     - yfinance==0.2.65
     - httpx==0.28.1
-    
-    # Environment & Configuration
     - python-dotenv==1.1.0
-    
-    # AI/ML APIs
     - openai==1.84.0
-    
-    # Data Processing
-    - beautifulsoup4>=4.13.0
-    - aiohttp>=3.11.0
-    - python-multipart>=0.0.6
+    - beautifulsoup4==4.13.4
+    - aiohttp==3.11.18
+    - python-multipart==0.0.9
     - openpyxl==3.1.4
     - joblib==1.4.2
-    
-    # PDF Generation
     - reportlab==4.4.0
     - fpdf2==2.8.4
-    
-    # Template Engine
-    - jinja2>=3.1.2
-    
-    # Utilities
-    - pathlib>=1.0.0
-    - python-dateutil>=2.8.2
+    - jinja2==3.1.4
+    - pathlib==1.0.1
+    - python-dateutil==2.9.0.post0
     - pydantic==2.11.5
+    - tenacity==8.3.0
+    - packaging==24.0

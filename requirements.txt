@@ -1,51 +1,28 @@
-# Core Dependencies First
-numpy==1.26.4
-pandas==2.3.2
-
-# Web Frameworks
 streamlit==1.49.1
-fastapi==0.116.1
-uvicorn==0.34.2
-
-# Visualization (with dependencies)
 plotly==6.3.0
-matplotlib==3.9.0
-seaborn==0.13.2
-
-# Financial Data & APIs
+pandas==2.3.2
+numpy==1.26.4
 yfinance==0.2.65
 requests==2.32.2
-httpx==0.28.1
-
-# Environment & Configuration
 python-dotenv==1.1.0
-pyyaml==6.0.2
-
-# AI/ML APIs
 openai==1.84.0
-
-# Machine Learning
-scikit-learn==1.5.0
-
-# Data Processing
+pyyaml==6.0.2
 beautifulsoup4==4.13.4
+matplotlib==3.9.0
+seaborn==0.13.2
+scikit-learn==1.5.0
+fastapi==0.116.1
+uvicorn==0.34.2
+httpx==0.28.1
 aiohttp==3.11.18
 python-multipart==0.0.9
 openpyxl==3.1.4
 joblib==1.4.2
-
-# PDF Generation
 reportlab==4.4.0
 fpdf2==2.8.4
-
-# Template Engine
 jinja2==3.1.4
-
-# Utilities
 pathlib==1.0.1
 python-dateutil==2.9.0.post0
 pydantic==2.11.5
-
-# Additional dependencies that might be needed
 tenacity==8.3.0
 packaging==24.0
