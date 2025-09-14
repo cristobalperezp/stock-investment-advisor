@@ -626,7 +626,7 @@ class InvestmentAnalyzer:
             ),
             'precio_promedio': df_temp['Valor_Accion'].mean() if df_temp['Valor_Accion'].notna().any() else 0,
             'variacion_promedio_6m': df_temp['Variacion_6M'].mean() * 100 if df_temp['Variacion_6M'].notna().any() else 0,
-            'dividend_yield_promedio': df_temp[df_temp['Dividend_Yield'].notna()]['Dividend_Yield'].mean() * 100 if df_temp['Dividend_Yield'].notna().any() else 0,
+            'dividend_yield_promedio': df_temp[df_temp['Dividend_Yield'].notna()]['Dividend_Yield'].mean() if df_temp['Dividend_Yield'].notna().any() else 0,
             'sectores': df['Sector'].value_counts().to_dict() if 'Sector' in df.columns else {},
         }
         

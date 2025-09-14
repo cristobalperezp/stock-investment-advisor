@@ -654,7 +654,7 @@ def show_data_tables(result):
     fundamental_display = fundamental_subset[display_cols].copy()
     
     # Aplicar formato
-    for col in ['ROE', 'Dividend_Yield', 'Variacion_6M', 'Volatilidad']:
+    for col in ['ROE', 'Variacion_6M', 'Volatilidad']:
         if col in fundamental_display.columns:
             # Convertir a numérico antes de formatear
             fundamental_display[col] = pd.to_numeric(
@@ -662,6 +662,14 @@ def show_data_tables(result):
             ).apply(
                 lambda x: f"{x*100:.2f}%" if pd.notna(x) else "N/A"
             )
+    
+    # CORREGIDO: Dividend_Yield ya viene como porcentaje de Yahoo Finance
+    if 'Dividend_Yield' in fundamental_display.columns:
+        fundamental_display['Dividend_Yield'] = pd.to_numeric(
+            fundamental_display['Dividend_Yield'], errors='coerce'
+        ).apply(
+            lambda x: f"{x:.2f}%" if pd.notna(x) else "N/A"
+        )
     
     # Formatear Precio_Actual
     fundamental_display['Precio_Actual'] = pd.to_numeric(
