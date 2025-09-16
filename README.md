@@ -240,7 +240,7 @@ python check_system.py
 
 ### Análisis Extendido por Sectores (20+ Acciones)
 **Configuración en `src/config/stocks_config.py`:**
-- 🏦 **Banca** (5): BSANTANDER.SN, BCI.SN, CHILE.SN, BICECORP.SN, ITAU.SN
+- 🏦 **Banca** (5): BSANTANDER.SN, BCI.SN, CHILE.SN, BICECORP.SN, ITAUCL.SN
 - 🛒 **Retail** (6): FALABELLA.SN, RIPLEY.SN, CENCOSUD.SN, FORUS.SN, SMU.SN, TRICOT.SN  
 - ⚡ **Utilities** (5): ENELCHILE.SN, COLBUN.SN, AGUAS-A.SN, GASCO.SN, ECL.SN
 - 🍺 **Bebidas** (3): CCU.SN, CONCHATORO.SN, EMBONOR-B.SN
