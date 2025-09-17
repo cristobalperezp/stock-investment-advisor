@@ -333,10 +333,10 @@ class InvestmentReportGenerator:
 - **Total a invertir**: ${total_real:,.0f}
 - **Empresas recomendadas**: {recommendations['empresas_recomendadas']}
 
-### 💰 Top 5 Recomendaciones"""
+### 💰 Top 3 Recomendaciones"""
         
-        # Top 5 recomendaciones usando los valores CORREGIDOS
-        for i, company in enumerate(recommendations['distribucion'][:5], 1):
+        # Top 3 recomendaciones usando los valores CORREGIDOS
+        for i, company in enumerate(recommendations['distribucion'][:3], 1):
             monto_real = company['Monto_Inversion']  # Ya corregido en investment_analyzer
             porcentaje_real = company['Porcentaje_Recomendado']  # Ya corregido
             
