@@ -156,10 +156,10 @@ def show_investment_analysis():
                 st.success(f"✅ Análisis completado! Se seleccionaron las TOP {top_stocks_count} acciones de {len(ALL_CHILEAN_STOCKS)} analizadas.")
                 
                 # Mostrar si se usó GPT o análisis automático
-                if 'gpt_analysis' in result and result['gpt_analysis']:
-                    st.info("🤖 Análisis realizado con IA (GPT)")
-                else:
-                    st.warning("⚠️ Análisis automático (GPT no disponible)")
+                # if 'gpt_analysis' in result and result['gpt_analysis']:
+                #     st.info("🤖 Análisis realizado con IA (GPT)")
+                # else:
+                #     st.warning("⚠️ Análisis automático (GPT no disponible)")
                 
             except Exception as e:
                 st.error(f"❌ Error en el análisis: {str(e)}")
