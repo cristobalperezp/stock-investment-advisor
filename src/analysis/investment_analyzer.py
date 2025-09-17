@@ -713,37 +713,44 @@ class InvestmentAnalyzer:
             ]]
             
             # Crear prompt para GPT con formato Markdown
-            task_prompt = f"""Eres un analista financiero experimentado especializado en evaluar inversiones en empresas que operan en la bolsa chilena.
+            task_prompt = f"""
+Eres un **analista financiero senior** especializado en la bolsa chilena. 
+Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las siguientes empresas:
 
-Analiza los datos de las siguientes empresas:
 {df_dividends.to_string()}
 
-Evalúa los siguientes aspectos usando formato Markdown con estructura clara:
+### Instrucciones:
+- Usa formato **Markdown estructurado**, con los mismos títulos y subtítulos indicados abajo.
+- Escribe **frases cortas y claras** (máximo 2 líneas por punto).
+- Si un dato falta o no está en el dataframe, escribe **“No disponible”**.
+- No inventes información externa.
+- Limita la respuesta a **máximo 350 tokens**.
+
+### Estructura esperada:
 
 ### 📈 Análisis de Datos Fundamentales
-- **Mejores ROE**: [empresas y valores]
-- **Análisis P/E**: [evaluación ratios precio-ganancia]
+- **Mejores ROE**: [empresa(s) con valores]
+- **Análisis P/E**: [comparación de ratios, alto vs bajo]
 
 ### 💹 Variación de Precios  
 - **Mejores performers 6M**: [empresas destacadas]
-- **Tendencias 1M**: [análisis corto plazo]
+- **Tendencias 1M**: [breve análisis corto plazo]
 
 ### 💰 Flujo de Efectivo
 - **Cash Flow operativo**: [evaluación]
-- **Endeudamiento**: [análisis ratios]
+- **Endeudamiento**: [comparación ratios deuda/capital]
 
 ### ⚖️ Análisis de Riesgo
-- **Beta promedio**: [valor y evaluación]
+- **Beta promedio**: [valor + interpretación riesgo]
 
 ### 💎 Dividendos
-- **Mejores yields**: [empresas destacadas]
-- **Frecuencia**: [regularidad pagos]
+- **Mejores yields**: [empresas con mayor rentabilidad]
+- **Frecuencia**: [regularidad de pagos]
 
 ### 🎯 Recomendaciones
-- **Top empresas**: [3-5 mejores opciones]
-- **Estrategia**: [diversificación sugerida]
-
-Máximo 350 tokens."""
+- **Top empresas**: [3–5 mejores opciones]
+- **Estrategia**: [sugerencia de diversificación breve]
+"""
             
             completion = client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -778,37 +785,52 @@ Máximo 350 tokens."""
             
             # Crear prompt para GPT con instrucciones MÁS ESTRICTAS
             task_prompt = f"""
-            Eres un asesor financiero especializado en inversiones en la bolsa chilena.
+Eres un **asesor financiero experto en portafolios de la bolsa chilena**. 
+Debes **asignar EXACTAMENTE el presupuesto disponible** según el informe y las ponderaciones.
 
-            Distribuye EXACTAMENTE el presupuesto basándote en:
+---
 
-            Informe Financiero:
-            {gpt_analysis}
+### Datos de entrada
+- **Informe Financiero**:
+{gpt_analysis}
 
-            Distribución de Pesos:
-            {portfolio_weights.to_string()}
+- **Distribución de Pesos**:
+{portfolio_weights.to_string()}
 
-            Presupuesto EXACTO: ${budget:,}
+- **Presupuesto total**: ${budget:,}
 
-            Formato de respuesta:
-            ### Distribución de Inversión
-            - Empresa 1: $ [dinero]
-            - Empresa 2: $ [dinero]
-            ...
-            TOTAL: ${budget:,}
+---
 
-            ### Justificación de Inversión
-            - [justificación corta]
+### Instrucciones estrictas
+1. El **TOTAL debe ser EXACTAMENTE ${budget:,}**.  
+2. Debe haber **mínimo 8 empresas** en el portafolio.  
+3. Cada empresa recibe al menos **$20,000**.  
+4. Todas las asignaciones deben ser en **múltiplos de $1,000**.  
+5. La suma debe ser **verificada antes de responder**.  
+6. Debe existir **diversificación entre sectores**.  
+7. Responde en **máximo 400 tokens**.  
+8. **No incluyas nada fuera del formato pedido**.  
 
-            REGLAS ESTRICTAS:
-            - El TOTAL debe ser EXACTAMENTE ${budget:,}
-            - Mínimo 8 empresas en portafolio
-            - Inversión mínima por empresa: $20,000
-            - Múltiplos de $1,000
-            - Verificar que la suma sea exacta antes de responder
-            - Diversificación entre sectores
-            - Máximo 400 tokens
-            """
+---
+
+### Formato de salida requerido
+
+### 📊 Distribución de Inversión
+- Empresa 1: $ [dinero]
+- Empresa 2: $ [dinero]
+...
+**TOTAL: ${budget:,}**
+
+### 📝 Justificación de Inversión
+- [breve justificación en 3–4 frases]
+
+---
+
+### Paso final
+Antes de dar tu respuesta final:  
+- Verifica que la suma sea EXACTAMENTE ${budget:,}.  
+- Si no cuadra, ajusta la última empresa para corregir.  
+"""
             
             completion = client.chat.completions.create(
                 model="gpt-4o-mini",

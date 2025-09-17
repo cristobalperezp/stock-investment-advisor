@@ -146,6 +146,10 @@ dmypy.json
 .streamlit/
 streamlit_cache/
 
+# ============ PROMPTS ============
+# Prompt engineering files
+prompts_versions.txt
+
 # ============ DATA & CACHE ============
 # Cache system (mantener estructura pero ignorar contenido)
 data/cache/*.csv
