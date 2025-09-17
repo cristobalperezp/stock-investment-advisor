@@ -807,12 +807,12 @@ def show_complete_report(result, config):
             - **Empresas recomendadas**: {result['recommendations'].get('empresas_recomendadas', 'N/A')}
             - **Total a invertir**: ${result['recommendations'].get('total_invertido', 0):,}
 
-            ### 💎 Top 5 Recomendaciones
+            ### 💎 Top 3 Recomendaciones
             """
             
-            # Agregar top 5 recomendaciones si están disponibles
+            # Agregar top 3 recomendaciones si están disponibles
             if 'distribucion' in result['recommendations']:
-                for i, company in enumerate(result['recommendations']['distribucion'][:5], 1):
+                for i, company in enumerate(result['recommendations']['distribucion'][:3], 1):
                     basic_report_text += f"""
                     **{i}. {company.get('Empresa', 'N/A')} ({company.get('Sector', 'N/A')})**
                     - Inversión: ${company.get('Monto_Inversion', 0):,}
