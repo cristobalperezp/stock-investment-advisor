@@ -225,8 +225,8 @@ def show_investment_analysis():
         
         # Tabs para organizar contenido
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "📈 Distribución TOP", "🦾 Análisis GPT", "📊 Análisis Detallado",
-            "📋 Tabla de Datos", "📄 Reporte Completo"
+            "📈 Distribución TOP", "📊 Análisis Detallado",
+            "📋 Tabla de Datos", "📄 Reporte Completo", "🦾 Análisis GPT",
         ])
 
         with tab1:
