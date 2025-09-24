@@ -2,6 +2,8 @@
 
 Dashboard interactivo para análisis integral del mercado bursátil chileno con análisis técnico, fundamental y reportes automáticos. Sistema completo con cache inteligente, visualizaciones profesionales y automatización via GitHub Actions.
 
+Link al sitio: [Visitar la App](https://gpt-investment-advisor.streamlit.app/)
+
 ## 📋 Descripción del Proyecto
 
 Este proyecto implementa un sistema completo de análisis bursátil chileno, incluyendo:
