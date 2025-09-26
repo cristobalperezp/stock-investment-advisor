@@ -74,16 +74,52 @@ def load_market_data(custom_tickers=None):
     if custom_tickers:
         default_symbols = extractor.default_stocks
         combined_symbols = list(set(default_symbols + custom_tickers))
+    else:
+        combined_symbols = extractor.default_stocks
+    
+    # Obtener precios actuales para todos los símbolos
+    current_prices = extractor.get_current_prices(combined_symbols)
+    
+    # Crear resumen basado en los datos realmente obtenidos
+    if not current_prices.empty:
+        total_stocks = len(current_prices)
+        gainers = len(current_prices[current_prices['change_percent'] > 0])
+        losers = len(current_prices[current_prices['change_percent'] < 0])
+        unchanged = total_stocks - gainers - losers
         
-        # Usar los símbolos combinados para obtener datos
-        market_summary = extractor.get_market_summary()
-        current_prices = extractor.get_current_prices(combined_symbols)
-        movers = extractor.get_market_movers(limit=10)
+        if gainers > losers:
+            trend = 'Alcista'
+        elif losers > gainers:
+            trend = 'Bajista'
+        else:
+            trend = 'Neutral'
+        
+        market_summary = {
+            'total_stocks': total_stocks,
+            'gainers': gainers,
+            'losers': losers,
+            'unchanged': unchanged,
+            'market_trend': trend
+        }
+        
+        # Crear movers basados en los datos actuales
+        sorted_data = current_prices.sort_values('change_percent', ascending=False)
+        limit = 10 if custom_tickers else 5
+        top_count = min(limit, len(sorted_data))
+        
+        movers = {
+            'gainers': sorted_data.head(top_count),
+            'losers': sorted_data.tail(top_count)
+        }
+    else:
+        market_summary = {'total_stocks': 0, 'gainers': 0, 'losers': 0, 
+                         'unchanged': 0, 'market_trend': 'Sin datos'}
+        movers = {'gainers': pd.DataFrame(), 'losers': pd.DataFrame()}
+    
+    # Obtener volatilidad
+    if custom_tickers:
         volatility = extractor.get_volatility_ranking(custom_symbols=combined_symbols)
     else:
-        market_summary = extractor.get_market_summary()
-        current_prices = extractor.get_current_prices()
-        movers = extractor.get_market_movers(limit=5)
         volatility = extractor.get_volatility_ranking()
     
     return market_summary, current_prices, movers, volatility
