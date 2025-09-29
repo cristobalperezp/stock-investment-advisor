@@ -854,14 +854,14 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 ### Formato de salida requerido
 
 ### 📊 Distribución de Inversión ({risk_level.capitalize()})
-- Empresa 1 [Ticker Empresa]: $ [dinero]
-- Empresa 2 [Ticker Empresa]: $ [dinero]
+- Ticker Empresa 1 : $ [dinero]
+- Ticker Empresa 2 : $ [dinero]
 ...
 **TOTAL: ${budget:,}**
 
 ### 📝 Justificación de Inversión
 - [Explicar por qué esta distribución se ajusta al perfil {risk_level.upper()}]
-- [Mencionar la estrategia de diversificación aplicada]
+- [Mencionar la estrategia de diversificación aplicada, no menciones nada de los múltiplos o minimos de inversion]
 
 ---
 
