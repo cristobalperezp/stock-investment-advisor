@@ -818,7 +818,7 @@ Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las
             # Crear prompt personalizado con perfil de riesgo
             task_prompt = f"""
 Eres un **asesor financiero experto en portafolios de la bolsa chilena**.
-Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de riesgo del cliente.
+Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de riesgo del cliente, usando una distribución **ponderada, no equitativa**, basada en los datos, análisis previos y tu criterio experto.
 
 ---
 
@@ -854,8 +854,8 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 ### Formato de salida requerido
 
 ### 📊 Distribución de Inversión ({risk_level.capitalize()})
-- Empresa 1: $ [dinero]
-- Empresa 2: $ [dinero]
+- Empresa 1 [Ticker Empresa]: $ [dinero]
+- Empresa 2 [Ticker Empresa]: $ [dinero]
 ...
 **TOTAL: ${budget:,}**
 
