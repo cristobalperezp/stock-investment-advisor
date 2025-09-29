@@ -766,35 +766,74 @@ Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las
             return self._generate_fallback_analysis(df_fundamentals)
     
     def financial_advisor_gpt(self, gpt_analysis: str, portfolio_weights: pd.DataFrame, 
-                             budget: int) -> str:
+                             budget: int, risk_level: str = "moderado", 
+                             num_companies: int = 10) -> str:
         """
-        Genera distribución de inversión usando GPT
-        Replica la función financial_assesor del notebook
+        Genera distribución de inversión usando GPT con perfil de riesgo personalizado
+        
+        Args:
+            gpt_analysis: Análisis previo generado por business_analyst_gpt
+            portfolio_weights: DataFrame con pesos calculados del portafolio
+            budget: Presupuesto total para inversión
+            risk_level: Nivel de riesgo ("conservador", "moderado", "agresivo")
+            num_companies: Número de empresas deseadas en el portafolio
         """
         if not OPENAI_AVAILABLE:
-            return self._generate_fallback_distribution(portfolio_weights, budget)
+            return self._generate_fallback_distribution(
+                portfolio_weights, budget, risk_level, num_companies
+            )
         
         try:
             # Configurar cliente OpenAI
             api_key = os.getenv('OPENAI_API_KEY')
             if not api_key:
                 logger.warning("OPENAI_API_KEY no encontrada. Usando distribución fallback.")
-                return self._generate_fallback_distribution(portfolio_weights, budget)
+                return self._generate_fallback_distribution(
+                    portfolio_weights, budget, risk_level, num_companies
+                )
             
             client = OpenAI(api_key=api_key)
             
-            # Crear prompt para GPT con instrucciones MÁS ESTRICTAS
+            # Definir estrategias por perfil de riesgo
+            risk_strategies = {
+                "conservador": {
+                    "description": "Perfil CONSERVADOR: Priorizar empresas estables con dividendos altos, menor volatilidad y beta baja. Concentrar en sectores defensivos (utilities, banca sólida).",
+                    "min_dividend_focus": "70%",
+                    "diversification": "máxima diversificación"
+                },
+                "moderado": {
+                    "description": "Perfil MODERADO: Balance entre estabilidad y crecimiento. Combinar empresas maduras con dividendos y algunas de crecimiento.",
+                    "min_dividend_focus": "50%",
+                    "diversification": "diversificación equilibrada"
+                },
+                "agresivo": {
+                    "description": "Perfil AGRESIVO: Priorizar empresas de alto crecimiento, mejor ROE y performance reciente. Tolerar mayor volatilidad por retornos superiores.",
+                    "min_dividend_focus": "30%",
+                    "diversification": "concentración en mejores performers"
+                }
+            }
+            
+            risk_strategy = risk_strategies.get(risk_level.lower(), risk_strategies["moderado"])
+            
+            # Crear prompt personalizado con perfil de riesgo
             task_prompt = f"""
-Eres un **asesor financiero experto en portafolios de la bolsa chilena**. 
-Debes **asignar EXACTAMENTE el presupuesto disponible** según el informe y las ponderaciones.
+Eres un **asesor financiero experto en portafolios de la bolsa chilena**.
+Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de riesgo del cliente.
 
 ---
+
+### Perfil del Cliente
+- **Nivel de Riesgo**: {risk_level.upper()}
+- **Estrategia**: {risk_strategy['description']}
+- **Número de empresas deseadas**: {num_companies}
+- **Enfoque en dividendos**: {risk_strategy['min_dividend_focus']} del portafolio
+- **Diversificación**: {risk_strategy['diversification']}
 
 ### Datos de entrada
 - **Informe Financiero**:
 {gpt_analysis}
 
-- **Distribución de Pesos**:
+- **Distribución de Pesos Calculados**:
 {portfolio_weights.to_string()}
 
 - **Presupuesto total**: ${budget:,}
@@ -802,34 +841,35 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el informe y las 
 ---
 
 ### Instrucciones estrictas
-1. El **TOTAL debe ser EXACTAMENTE ${budget:,}**.  
-2. Debe haber **mínimo 8 empresas** en el portafolio.  
-3. Cada empresa recibe al menos **$20,000**.  
-4. Todas las asignaciones deben ser en **múltiplos de $1,000**.  
-5. La suma debe ser **verificada antes de responder**.  
-6. Debe existir **diversificación entre sectores**.  
-7. Responde en **máximo 400 tokens**.  
-8. **No incluyas nada fuera del formato pedido**.  
+1. El **TOTAL debe ser EXACTAMENTE ${budget:,}**.
+2. Incluir **exactamente {num_companies} empresas** en el portafolio.
+3. Cada empresa recibe al menos **$20,000**.
+4. Todas las asignaciones deben ser en **múltiplos de $1,000**.
+5. **ADAPTAR la distribución al perfil de riesgo {risk_level.upper()}**.
+6. La suma debe ser **verificada antes de responder**.
+7. Responde en **máximo 450 tokens**.
 
 ---
 
 ### Formato de salida requerido
 
-### 📊 Distribución de Inversión
+### 📊 Distribución de Inversión ({risk_level.capitalize()})
 - Empresa 1: $ [dinero]
 - Empresa 2: $ [dinero]
 ...
 **TOTAL: ${budget:,}**
 
 ### 📝 Justificación de Inversión
-- [breve justificación en 3–4 frases]
+- [Explicar por qué esta distribución se ajusta al perfil {risk_level.upper()}]
+- [Mencionar la estrategia de diversificación aplicada]
 
 ---
 
 ### Paso final
-Antes de dar tu respuesta final:  
-- Verifica que la suma sea EXACTAMENTE ${budget:,}.  
-- Si no cuadra, ajusta la última empresa para corregir.  
+Antes de dar tu respuesta final:
+- Verifica que la suma sea EXACTAMENTE ${budget:,}.
+- Confirma que tienes exactamente {num_companies} empresas.
+- Si no cuadra, ajusta proporcionalmente para corregir.
 """
             
             completion = client.chat.completions.create(
@@ -848,7 +888,9 @@ Antes de dar tu respuesta final:
             
         except Exception as e:
             logger.error(f"Error en asesoría GPT: {str(e)}")
-            return self._generate_fallback_distribution(portfolio_weights, budget)
+            return self._generate_fallback_distribution(
+                portfolio_weights, budget, risk_level, num_companies
+            )
     
     def _validate_and_fix_gpt_budget(self, gpt_response: str, target_budget: int) -> str:
         """
@@ -1136,10 +1178,12 @@ Antes de dar tu respuesta final:
         analysis = "\n".join(analysis_parts)
         return analysis.strip()
     
-    def _generate_fallback_distribution(self, portfolio_weights: pd.DataFrame, budget: int) -> str:
+    def _generate_fallback_distribution(self, portfolio_weights: pd.DataFrame, 
+                                        budget: int, risk_level: str = "moderado", 
+                                        num_companies: int = 10) -> str:
         """Genera distribución básica cuando GPT no está disponible"""
         
-        distribution_text = "### Distribución de Inversión (Automatizada)\n"
+        distribution_text = f"### Distribución de Inversión (Automatizada - {risk_level.capitalize()})\n"
         total_invested = 0
         min_investment = 20000
         
@@ -1151,14 +1195,19 @@ Antes de dar tu respuesta final:
                 portfolio_weights_temp['Peso_Asignado'], errors='coerce'
             )
             # Eliminar filas con pesos inválidos
-            portfolio_weights_temp = portfolio_weights_temp.dropna(subset=['Peso_Asignado'])
+            portfolio_weights_temp = portfolio_weights_temp.dropna(
+                subset=['Peso_Asignado']
+            )
             
             if portfolio_weights_temp.empty:
                 # Si no hay datos válidos, crear distribución igual
                 distribution_text += "- Error en datos de peso, distribución no disponible\n"
                 return distribution_text
             
-            top_companies = portfolio_weights_temp.nlargest(10, 'Peso_Asignado')
+            # Usar el número de empresas especificado por el usuario
+            top_companies = portfolio_weights_temp.nlargest(
+                num_companies, 'Peso_Asignado'
+            )
         except Exception as e:
             logger.error(f"Error en nlargest: {e}")
             distribution_text += "- Error en cálculo de distribución\n"
@@ -1176,12 +1225,36 @@ Antes de dar tu respuesta final:
             total_invested += investment
         
         distribution_text += f"TOTAL: ${total_invested:,}\n\n"
-        distribution_text += """
-        ### Justificación de Inversión
-        - Distribución basada en análisis fundamental automatizado
-        - Diversificación entre mejores empresas por métricas
+        
+        # Justificación personalizada según perfil de riesgo
+        risk_justifications = {
+            "conservador": [
+                "- Enfoque en empresas estables con dividendos consistentes",
+                "- Priorización de sectores defensivos y menor volatilidad",
+                "- Diversificación máxima para reducir riesgo"
+            ],
+            "moderado": [
+                "- Balance entre estabilidad y oportunidades de crecimiento",
+                "- Combinación de empresas maduras y algunas con potencial",
+                "- Diversificación equilibrada entre sectores"
+            ],
+            "agresivo": [
+                "- Concentración en empresas de alto crecimiento y ROE superior",
+                "- Mayor tolerancia a volatilidad por retornos potenciales",
+                "- Enfoque en performance y métricas de crecimiento"
+            ]
+        }
+        
+        justification_lines = risk_justifications.get(
+            risk_level.lower(), risk_justifications["moderado"]
+        )
+        
+        distribution_text += f"""
+        ### Justificación de Inversión (Perfil {risk_level.capitalize()})
+        - Distribución automatizada para {num_companies} empresas seleccionadas
+        {chr(10).join(justification_lines)}
         - Inversión mínima $20,000 por empresa
-        - Enfoque en dividendos y fundamentales sólidos
+        - Análisis basado en datos fundamentales actualizados
 
         *Para asesoría IA personalizada configure OPENAI_API_KEY.*
         """
@@ -1233,7 +1306,8 @@ Antes de dar tu respuesta final:
             
             # 5. Generar distribución con GPT (concentrada en TOP X acciones)
             gpt_distribution = self.financial_advisor_gpt(
-                gpt_analysis, top_portfolio_weights, budget
+                gpt_analysis, top_portfolio_weights, budget, 
+                risk_level, top_stocks_count
             )
             
             # 6. Generar recomendaciones concentradas en TOP X acciones
