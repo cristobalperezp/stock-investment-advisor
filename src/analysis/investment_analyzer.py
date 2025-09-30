@@ -860,6 +860,7 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 **TOTAL: ${budget:,}**
 
 ### 📝 Justificación de Inversión
+- [Justificar selección de empresas y montos]
 - [Explicar por qué esta distribución se ajusta al perfil {risk_level.upper()}]
 - [Mencionar la estrategia de diversificación aplicada, no menciones nada de los múltiplos o minimos de inversion]
 
