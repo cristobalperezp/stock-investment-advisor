@@ -419,12 +419,25 @@ def show_gpt_analysis(result):
             if 'gpt_distribution' in result and result['gpt_distribution'] and not result['gpt_distribution'].startswith('### Distribución de Inversión (Automatizada)'):
                 # Extraer información básica de la distribución GPT
                 gpt_text = result['gpt_distribution']
-                if gpt_text and "TOTAL:" in gpt_text:
-                    # Buscar líneas que contienen "TOTAL:" y extraer solo esas
+                if gpt_text:
+                    # Buscar líneas con TOTAL de forma más flexible
+                    import re
                     lines = gpt_text.split('\n')
-                    total_lines = [line.strip() for line in lines if 'TOTAL:' in line.upper()]
+                    
+                    # Buscar líneas con TOTAL usando regex más flexible
+                    total_lines = []
+                    for line in lines:
+                        if re.search(r'TOTAL\s*[:\-]\s*\$', line.upper()):
+                            total_lines.append(line.strip())
+                    
                     if total_lines:
                         st.info(total_lines[0])
+                    else:
+                        # Fallback: extraer total con regex directamente
+                        total_match = re.search(r'TOTAL\s*[:\-]\s*\$\s*([\d,]+)', gpt_text, re.IGNORECASE)
+                        if total_match:
+                            total_amount = total_match.group(1).replace(',', '')
+                            st.info(f"TOTAL: ${int(total_amount):,}")
                 
                 # Contar empresas mencionadas de forma más precisa
                 if gpt_text:
