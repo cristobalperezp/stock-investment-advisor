@@ -872,6 +872,7 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 Antes de dar tu respuesta final:
 - Verifica que la suma sea EXACTAMENTE ${budget:,}.
 - Confirma que tienes exactamente {num_companies} empresas.
+- Verifica que *NO HAYA MÁS DE 2 EMPRESAS POR SECTOR*.
 - Si no cuadra, ajusta proporcionalmente para corregir.
 """
             
@@ -1318,14 +1319,20 @@ Antes de dar tu respuesta final:
             self.portfolio_weights = top_portfolio_weights
             recommendations = self.generate_investment_recommendations(budget)
             
-            # 7. NUEVO: Parsear distribución GPT y actualizar recomendaciones
-            if gpt_distribution and not gpt_distribution.startswith('### Distribución de Inversión (Automatizada)'):
-                updated_recommendations = self._sync_recommendations_with_gpt(
-                    recommendations, gpt_distribution, budget
-                )
-                if updated_recommendations:
-                    recommendations = updated_recommendations
-                    logger.info("✅ Recomendaciones sincronizadas con distribución GPT")
+            # 7. COMENTADO TEMPORALMENTE: Parsear distribución GPT y actualizar recomendaciones
+            # Para permitir ver la distribución original de GPT sin sincronización
+            logger.info("📊 DISTRIBUCIÓN GPT ORIGINAL (sin sincronizar):")
+            if gpt_distribution:
+                logger.info(f"\n{gpt_distribution}")
+            
+            # SINCRONIZACIÓN DESHABILITADA TEMPORALMENTE PARA DEBUG
+            # if gpt_distribution and not gpt_distribution.startswith('### Distribución de Inversión (Automatizada)'):
+            #     updated_recommendations = self._sync_recommendations_with_gpt(
+            #         recommendations, gpt_distribution, budget
+            #     )
+            #     if updated_recommendations:
+            #         recommendations = updated_recommendations
+            #         logger.info("✅ Recomendaciones sincronizadas con distribución GPT")
             
             # 8. Generar resumen del mercado (con todas las acciones para contexto)
             market_summary = self.get_market_summary(df_fundamentals)
@@ -1335,14 +1342,16 @@ Antes de dar tu respuesta final:
             return {
                 'fundamental_data': df_fundamentals_filtered,  # Solo TOP X
                 'all_fundamental_data': df_fundamentals,       # Todas para contexto
-                'recommendations': recommendations,
+                'recommendations': recommendations,  # Recomendaciones automáticas
                 'market_summary': market_summary,
                 'gpt_analysis': gpt_analysis,
-                'gpt_distribution': gpt_distribution,
+                'gpt_distribution': gpt_distribution,  # Distribución GPT ORIGINAL
+                'gpt_distribution_original': gpt_distribution,  # Copia para debug
                 'portfolio_weights': top_portfolio_weights,
                 'all_portfolio_weights': portfolio_weights,    # Todas para comparación
                 'top_stocks_count': top_stocks_count,
-                'total_stocks_analyzed': len(df_fundamentals)
+                'total_stocks_analyzed': len(df_fundamentals),
+                'sync_disabled': True  # Flag para indicar que sync está deshabilitado
             }
             
         except Exception as e:
