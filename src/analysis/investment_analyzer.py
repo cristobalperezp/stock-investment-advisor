@@ -842,7 +842,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 1. TOTAL EXACTO: ${budget:,}.
 2. Exactamente {num_companies} empresas.
 3. **MÁXIMO 2 EMPRESAS POR SECTOR.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
-4. Mínimo por empresa: $20,000. Si no se cumple, reemplazar automáticamente por otro ticker disponible.
+4. MÍNIMO POR EMPRESA: $20,000. **NO SE PERMITEN EXCEPCIONES.** Si algún ticker quedara por debajo, **reemplazar inmediatamente por otro ticker disponible** y ajustar los montos de los demás para cumplir TOTAL EXACTO.
 5. Montos en múltiplos de $1,000, respetando el mínimo.
 6. Solo usar tickers listados en "Distribución de Pesos Calculados".
 7. No mostrar validaciones ni pasos intermedios, solo la salida final.
@@ -874,7 +874,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_tokens=600,
-                temperature=0.7
+                temperature=0.5
             )
             
             gpt_response = completion.choices[0].message.content
