@@ -818,62 +818,55 @@ Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las
             # Crear prompt personalizado con perfil de riesgo
             task_prompt = f"""
 Eres un **asesor financiero experto en portafolios de la bolsa chilena**.
-Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de riesgo del cliente, usando una distribución **ponderada, no equitativa**, basada en los datos, análisis previos y tu criterio experto.
+Debes asignar **EXACTAMENTE** el presupuesto disponible conforme al perfil de riesgo, usando una distribución **ponderada, no equitativa**.
 
----
+IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO muestres pasos intermedios, ni tablas de validación, ni listas de verificación**. Solo entrega la **salida final** en el formato exacto pedido.
 
 ### Perfil del Cliente
-- **Nivel de Riesgo**: {risk_level.upper()}
-- **Estrategia**: {risk_strategy['description']}
-- **Número de empresas deseadas**: {num_companies}
-- **Enfoque en dividendos**: {risk_strategy['min_dividend_focus']} del portafolio
-- **Diversificación**: {risk_strategy['diversification']} (no más de 2 empresas por sector)
+- Nivel de Riesgo: {risk_level.upper()}
+- Estrategia: {risk_strategy['description']}
+- Número de empresas deseadas: {num_companies}
+- Enfoque en dividendos: {risk_strategy['min_dividend_focus']}
+- Diversificación: {risk_strategy['diversification']} (máx. 2 empresas por sector)
 
 ### Datos de entrada
-- **Informe Financiero**:
+- Informe Financiero:
 {gpt_analysis}
 
-- **Distribución de Pesos Calculados**:
+- Distribución de Pesos Calculados (obligatorio: columna 'ticker' y preferible 'sector', 'weight', 'roe', 'yield', 'perf_6m'):
 {portfolio_weights.to_string()}
 
-- **Presupuesto total**: ${budget:,}
+- Presupuesto total: ${budget:,}
 
----
+### REGLAS OBLIGATORIAS (IMPRESCINDIBLES)
+1. TOTAL EXACTO: ${budget:,}.
+2. Exactamente {num_companies} empresas.
+3. **Máximo 2 empresas por sector.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
+4. Mínimo por empresa: $20,000. Si no se cumple, reemplazar automáticamente por otro ticker disponible.
+5. Montos en múltiplos de $1,000.
+6. Solo usar tickers listados en "Distribución de Pesos Calculados".
+7. No mostrar validaciones ni pasos intermedios, solo la salida final.
+8. Si no es posible cumplir todas las reglas, devuelve únicamente:  
+   `NO ES POSIBLE CUMPLIR RESTRICCIONES` (máx. 2 líneas explicando por qué).
+9. Responde en máximo 350–450 tokens.
 
-### Instrucciones estrictas
-1. El **TOTAL debe ser EXACTAMENTE ${budget:,}**.
-2. Incluir **exactamente {num_companies} empresas** en el portafolio.
-3. Cada empresa recibe al menos **$20,000**.
-4. Todas las asignaciones deben ser en **múltiplos de $1,000**.
-5. **ADAPTAR la distribución al perfil de riesgo {risk_level.upper()}**.
-6. La suma debe ser **verificada antes de responder**.
-7. Responde en **máximo 450 tokens**.
-8. **No incluyas nada fuera del formato pedido**.
+### LÓGICA APLICADA (EJECUTAR INTERNAMENTE, NO MOSTRAR)
+1. Primero, filtrar candidatos por sector para **respetar máximo 2 por sector**.
+2. Luego, ordenar por score (usar weight/roe/yield/perf_6m si existen).
+3. Seleccionar top {num_companies} dentro de las restricciones de sector.
+4. Asignar montos proporcionales al score, imponiendo mínimo $20,000 y redondeando a múltiplos de $1,000.
+5. Ajustar incrementalmente (± $1,000) hasta que TOTAL == ${budget:,}.
+6. Reemplazar cualquier ticker que no cumpla mínimo o límite de sector automáticamente.
 
----
-
-### Formato de salida requerido
-
+### SALIDA (SOLO ESTO)
 ### 📊 Distribución de Inversión ({risk_level.capitalize()})
-- Ticker Empresa 1 : $ [dinero]
-- Ticker Empresa 2 : $ [dinero]
-...
+- TICKER | SECTOR : $ [dinero]
+- ...
+**TOTAL: ${budget:,}**
 
-**TOTAL : $ {budget:,}**
+### 📝 Justificación (máx. 3 frases)
+- [1–3 frases explicando coherencia con perfil y diversificación]
 
-### 📝 Justificación de Inversión
-- [Justificar selección de empresas y montos]
-- [Explicar por qué esta distribución se ajusta al perfil {risk_level.upper()}]
-- [Mencionar la estrategia de diversificación aplicada, no menciones nada de los múltiplos o minimos de inversion]
-
----
-
-### Paso final
-Antes de dar tu respuesta final:
-- Verifica que la suma sea EXACTAMENTE ${budget:,}.
-- Confirma que tienes exactamente {num_companies} empresas.
-- Verifica que *NO HAYA MÁS DE 2 EMPRESAS POR SECTOR*.
-- Si no cuadra, ajusta proporcionalmente para corregir.
 """
             
             completion = client.chat.completions.create(
