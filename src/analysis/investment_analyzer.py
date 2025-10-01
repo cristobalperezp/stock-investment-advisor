@@ -874,7 +874,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_tokens=600,
-                temperature=0.5
+                temperature=0.3
             )
             
             gpt_response = completion.choices[0].message.content
