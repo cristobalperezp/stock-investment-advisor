@@ -403,72 +403,8 @@ def show_gpt_analysis(result):
             with st.container():
                 distribution_text = result['gpt_distribution']
                 if distribution_text:
-                    # Mostrar en un expander para ver claramente el contenido crudo
-                    with st.expander("📝 Ver distribución GPT completa", expanded=True):
-                        st.markdown(distribution_text)
-                    
-                    # También mostrar análisis de la distribución
-                    st.markdown("##### 🔍 Análisis de la Distribución GPT:")
-                    
-                    # Extraer información clave de la distribución
-                    import re
-                    lines = distribution_text.split('\n')
-                    investment_lines = [line for line in lines if line.strip().startswith('- ') and '$' in line]
-                    total_lines = [line for line in lines if 'TOTAL:' in line.upper()]
-                    
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.metric("🏢 Empresas GPT", len(investment_lines))
-                        
-                        # Extraer sectores de las inversiones GPT
-                        sectors_found = []
-                        for line in investment_lines:
-                            # Buscar tickers conocidos en la línea
-                            for ticker in ['HABITAT.SN', 'PROVIDA.SN', 'LTM.SN', 'MALLPLAZA.SN', 'PLANVITAL.SN', 'BICECORP.SN', 'FALABELLA.SN']:
-                                if ticker in line:
-                                    if ticker in ['HABITAT.SN', 'PROVIDA.SN', 'PLANVITAL.SN']:
-                                        sectors_found.append('AFP')
-                                    elif ticker == 'LTM.SN':
-                                        sectors_found.append('Transporte')
-                                    elif ticker == 'MALLPLAZA.SN':
-                                        sectors_found.append('Inmobiliario')
-                                    elif ticker == 'BICECORP.SN':
-                                        sectors_found.append('Banca')
-                                    elif ticker == 'FALABELLA.SN':
-                                        sectors_found.append('Retail')
-                        
-                        sector_counts = {}
-                        for sector in sectors_found:
-                            sector_counts[sector] = sector_counts.get(sector, 0) + 1
-                        
-                        if sector_counts:
-                            st.write("**Sectores detectados:**")
-                            for sector, count in sector_counts.items():
-                                color = "🔴" if count > 2 else "🟡" if count == 2 else "🟢"
-                                st.write(f"{color} {sector}: {count} empresa(s)")
-                                if count > 2:
-                                    st.error(f"⚠️ PROBLEMA: {sector} tiene {count} empresas (máximo permitido: 2)")
-                    
-                    with col2:
-                        if total_lines:
-                            total_text = total_lines[0]
-                            # Extraer monto del total
-                            total_match = re.search(r'\$\s*([\d,]+)', total_text)
-                            if total_match:
-                                total_amount = total_match.group(1).replace(',', '')
-                                st.metric("💰 Total GPT", f"${total_amount}")
-                            else:
-                                st.metric("💰 Total GPT", total_text)
-                        
-                        # Verificar si GPT cumplió las reglas
-                        rules_check = []
-                        rules_check.append(("✅" if len(investment_lines) <= 10 else "❌", f"Max 10 empresas: {len(investment_lines)}"))
-                        rules_check.append(("✅" if all(count <= 2 for count in sector_counts.values()) else "❌", "Max 2 por sector"))
-                        
-                        st.write("**Cumplimiento de reglas:**")
-                        for status, rule in rules_check:
-                            st.write(f"{status} {rule}")
+                    # Mostrar distribución GPT directamente sin expander
+                    st.markdown(distribution_text)
                 else:
                     st.warning("⚠️ Distribución GPT vacía")
         
@@ -496,6 +432,13 @@ def show_gpt_analysis(result):
                     investment_lines = [line for line in gpt_text.split('\n') if line.strip().startswith('- ') and '$' in line]
                     empresa_count = len(investment_lines)
                     st.metric("Empresas sugeridas (IA)", empresa_count)
+                    
+                    # Extraer y mostrar el total IA
+                    import re
+                    total_match = re.search(r'TOTAL\s*:\s*\$\s*([\d,]+)', gpt_text, re.IGNORECASE)
+                    if total_match:
+                        total_amount = total_match.group(1).replace(',', '')
+                        st.metric("Total IA", f"${int(total_amount):,}")
                 else:
                     st.metric("Empresas sugeridas (IA)", "N/A")
             else:
@@ -509,6 +452,7 @@ def show_gpt_analysis(result):
             
             st.info(f"TOTAL: ${auto_total:,}")
             st.metric("Empresas sugeridas (Auto)", auto_companies)
+            st.metric("Total Auto", f"${auto_total:,}")
         
         # Insight sobre las diferencias
         st.markdown("### 🔍 Insights y Diferencias")
