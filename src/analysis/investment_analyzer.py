@@ -866,9 +866,9 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 **TOTAL: $ {budget:,}**
 
 ### 📝 Justificación (no tan extenso)
-- [Explicación de la coherencia con perfil]
-- [Explicación de la diversificación]
-- [Explicación de empresas seleccionadas]
+- [Explicación de la coherencia con el perfil de riesgo con las empresas seleccionadas]
+- [Explicación de la diversificación lograda, sectores cubiertos, etc.]
+- [Explicación de empresas seleccionadas, fortalezas, enfoque en dividendos o crecimiento según perfil]
 
 """
             
