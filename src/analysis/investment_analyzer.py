@@ -843,7 +843,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 2. Exactamente {num_companies} empresas.
 3. **Máximo 2 empresas por sector.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
 4. Mínimo por empresa: $20,000. Si no se cumple, reemplazar automáticamente por otro ticker disponible.
-5. Montos en múltiplos de $1,000.
+5. Montos en múltiplos de $1,000, respetando el mínimo.
 6. Solo usar tickers listados en "Distribución de Pesos Calculados".
 7. No mostrar validaciones ni pasos intermedios, solo la salida final.
 8. Si no es posible cumplir todas las reglas, devuelve únicamente:  
@@ -855,7 +855,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 2. Luego, ordenar por score (usar weight/roe/yield/perf_6m si existen).
 3. Seleccionar top {num_companies} dentro de las restricciones de sector.
 4. Asignar montos proporcionales al score, imponiendo mínimo $20,000 y redondeando a múltiplos de $1,000.
-5. Ajustar incrementalmente (± $1,000) hasta que TOTAL == ${budget:,}.
+5. Ajustar incrementalmente (± $1,000), respetando el mínimo por empresa, hasta que TOTAL == ${budget:,}.
 6. Reemplazar cualquier ticker que no cumpla mínimo o límite de sector automáticamente.
 
 ### SALIDA (SOLO ESTO)
