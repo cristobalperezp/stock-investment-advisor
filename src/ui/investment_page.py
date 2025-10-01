@@ -394,13 +394,11 @@ def show_gpt_analysis(result):
         # Separador
         st.markdown("---")
         
-        # Distribución del Financial Advisor GPT - VERSIÓN ORIGINAL SIN SINCRONIZAR
+        # Distribución del Financial Advisor GPT
         if 'gpt_distribution' in result and result['gpt_distribution'] and not result['gpt_distribution'].startswith('### Distribución de Inversión (Automatizada)'):
-            st.markdown("#### 💼 Distribución de Inversión (IA) - ORIGINAL")
+            st.markdown("#### 💼 Distribución de Inversión (IA)")
             
-            # Notificación de que se muestra la versión original
-            if result.get('sync_disabled', False):
-                st.info("🔍 **DEBUG MODE**: Mostrando distribución GPT ORIGINAL (sin sincronización automática)")
+            # Distribución GPT original
             
             with st.container():
                 distribution_text = result['gpt_distribution']

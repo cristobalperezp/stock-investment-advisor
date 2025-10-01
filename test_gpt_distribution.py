@@ -117,5 +117,5 @@ if __name__ == "__main__":
     print("\n💡 PRÓXIMOS PASOS:")
     print("1. Ejecutar la aplicación Streamlit")
     print("2. Ir a la tab '🦾 Análisis GPT'")
-    print("3. Verificar que se muestra 'DEBUG MODE: Distribución GPT ORIGINAL'")
+    print("3. Verificar que se muestra la distribución GPT sin modo debug")
     print("4. Mejorar el prompt si GPT no respeta las reglas de diversificación")
