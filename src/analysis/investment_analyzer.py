@@ -827,7 +827,7 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 - **Estrategia**: {risk_strategy['description']}
 - **Número de empresas deseadas**: {num_companies}
 - **Enfoque en dividendos**: {risk_strategy['min_dividend_focus']} del portafolio
-- **Diversificación**: {risk_strategy['diversification']}
+- **Diversificación**: {risk_strategy['diversification']} (no más de 2 empresas por sector)
 
 ### Datos de entrada
 - **Informe Financiero**:
