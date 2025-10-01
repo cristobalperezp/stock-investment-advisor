@@ -433,12 +433,7 @@ def show_gpt_analysis(result):
                     empresa_count = len(investment_lines)
                     st.metric("Empresas sugeridas (IA)", empresa_count)
                     
-                    # Extraer y mostrar el total IA
-                    import re
-                    total_match = re.search(r'TOTAL\s*:\s*\$\s*([\d,]+)', gpt_text, re.IGNORECASE)
-                    if total_match:
-                        total_amount = total_match.group(1).replace(',', '')
-                        st.metric("Total IA", f"${int(total_amount):,}")
+
                 else:
                     st.metric("Empresas sugeridas (IA)", "N/A")
             else:
@@ -452,7 +447,6 @@ def show_gpt_analysis(result):
             
             st.info(f"TOTAL: ${auto_total:,}")
             st.metric("Empresas sugeridas (Auto)", auto_companies)
-            st.metric("Total Auto", f"${auto_total:,}")
         
         # Insight sobre las diferencias
         st.markdown("### 🔍 Insights y Diferencias")
