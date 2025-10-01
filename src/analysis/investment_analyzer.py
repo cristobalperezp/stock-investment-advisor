@@ -848,6 +848,7 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 5. **ADAPTAR la distribución al perfil de riesgo {risk_level.upper()}**.
 6. La suma debe ser **verificada antes de responder**.
 7. Responde en **máximo 450 tokens**.
+8. **No incluyas nada fuera del formato pedido**.
 
 ---
 
@@ -857,7 +858,8 @@ Debes **asignar EXACTAMENTE el presupuesto disponible** según el perfil de ries
 - Ticker Empresa 1 : $ [dinero]
 - Ticker Empresa 2 : $ [dinero]
 ...
-**TOTAL: ${budget:,}**
+
+**TOTAL : $ {budget:,}**
 
 ### 📝 Justificación de Inversión
 - [Justificar selección de empresas y montos]
