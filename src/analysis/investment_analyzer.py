@@ -841,7 +841,7 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 ### REGLAS OBLIGATORIAS (IMPRESCINDIBLES)
 1. TOTAL EXACTO: ${budget:,}.
 2. Exactamente {num_companies} empresas.
-3. **Máximo 2 empresas por sector.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
+3. **MÁXIMO 2 EMPRESAS POR SECTOR.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
 4. Mínimo por empresa: $20,000. Si no se cumple, reemplazar automáticamente por otro ticker disponible.
 5. Montos en múltiplos de $1,000, respetando el mínimo.
 6. Solo usar tickers listados en "Distribución de Pesos Calculados".
@@ -851,12 +851,12 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 9. Responde en máximo 350–450 tokens.
 
 ### LÓGICA APLICADA (EJECUTAR INTERNAMENTE, NO MOSTRAR)
-1. Primero, filtrar candidatos por sector para **respetar máximo 2 por sector**.
+1. Primero, filtrar candidatos por sector para **RESPETAR MÁXIMO 2 POR SECTOR**.
 2. Luego, ordenar por score (usar weight/roe/yield/perf_6m si existen).
 3. Seleccionar top {num_companies} dentro de las restricciones de sector.
 4. Asignar montos proporcionales al score, imponiendo mínimo $20,000 y redondeando a múltiplos de $1,000.
 5. Ajustar incrementalmente (± $1,000), respetando el mínimo por empresa, hasta que TOTAL == ${budget:,}.
-6. Reemplazar cualquier ticker que no cumpla mínimo o límite de sector automáticamente.
+6. Reemplazar cualquier ticker que no cumpla límite de sector automáticamente.
 
 ### SALIDA (SOLO ESTO)
 ### 📊 Distribución de Inversión ({risk_level.capitalize()})
