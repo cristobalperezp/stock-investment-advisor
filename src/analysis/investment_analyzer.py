@@ -865,8 +865,10 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 
 **TOTAL: $ {budget:,}**
 
-### 📝 Justificación
-- [punteo (3) explicando coherencia con perfil, diversificación, y empresas seleccionadas]
+### 📝 Justificación (no tan extenso)
+- [Explicación de la coherencia con perfil]
+- [Explicación de la diversificación]
+- [Explicación de empresas seleccionadas]
 
 """
             
