@@ -862,10 +862,11 @@ IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO mues
 ### 📊 Distribución de Inversión ({risk_level.capitalize()})
 - TICKER | SECTOR : $ [dinero]
 - ...
-**TOTAL: ${budget:,}**
+
+**TOTAL: $ {budget:,}**
 
 ### 📝 Justificación (máx. 3 frases)
-- [1–3 frases explicando coherencia con perfil y diversificación]
+- [punteo de 1–3 frases explicando coherencia con perfil, diversificación, y empresas seleccionadas]
 
 """
             
