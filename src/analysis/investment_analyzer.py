@@ -1305,12 +1305,12 @@ Antes de dar tu respuesta final:
                 df_fundamentals_filtered = df_fundamentals
                 logger.info(f"Usando todas las {len(portfolio_weights)} acciones disponibles")
             
-            # 4. Generar análisis con GPT (solo TOP X acciones)
-            gpt_analysis = self.business_analyst_gpt(df_fundamentals_filtered)
+            # 4. Generar análisis con GPT (todas las acciones disponibles)
+            gpt_analysis = self.business_analyst_gpt(df_fundamentals)
             
-            # 5. Generar distribución con GPT (concentrada en TOP X acciones)
+            # 5. Generar distribución con GPT (TODAS las acciones disponibles)
             gpt_distribution = self.financial_advisor_gpt(
-                gpt_analysis, top_portfolio_weights, budget, 
+                gpt_analysis, portfolio_weights, budget,
                 risk_level, top_stocks_count
             )
             
