@@ -714,46 +714,46 @@ class InvestmentAnalyzer:
             
             # Crear prompt para GPT con formato Markdown
             task_prompt = f"""
-Eres un **analista financiero senior** especializado en la bolsa chilena. 
-Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las siguientes empresas:
+            Eres un **analista financiero senior** especializado en la bolsa chilena. 
+            Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las siguientes empresas:
 
-{df_dividends.to_string()}
+            {df_dividends.to_string()}
 
-### Instrucciones:
-- Usa formato **Markdown estructurado**, con los mismos títulos y subtítulos indicados abajo.
-- Escribe **frases cortas y claras** (máximo 2 líneas por punto).
-- Si un dato falta o no está en el dataframe, escribe **“No disponible”**.
-- No inventes información externa.
-- Limita la respuesta a **máximo 350 tokens**.
+            ### Instrucciones:
+            - Usa formato **Markdown estructurado**, con los mismos títulos y subtítulos indicados abajo.
+            - Escribe **frases cortas y claras** (máximo 2 líneas por punto).
+            - Si un dato falta o no está en el dataframe, escribe **“No disponible”**.
+            - No inventes información externa.
+            - Limita la respuesta a **máximo 350 tokens**.
 
-### Estructura esperada:
+            ### Estructura esperada:
 
-### 📈 Análisis de Datos Fundamentales
-- **Mejores ROE**: [empresa(s) con valores]
-- **Análisis P/E**: [comparación de ratios, alto vs bajo]
+            ### 📈 Análisis de Datos Fundamentales
+            - **Mejores ROE**: [empresa(s) con valores]
+            - **Análisis P/E**: [comparación de ratios, alto vs bajo]
 
-### 💹 Variación de Precios  
-- **Mejores performers 6M**: [empresas destacadas]
-- **Tendencias 1M**: [breve análisis corto plazo]
+            ### 💹 Variación de Precios  
+            - **Mejores performers 6M**: [empresas destacadas]
+            - **Tendencias 1M**: [breve análisis corto plazo]
 
-### 💰 Flujo de Efectivo
-- **Cash Flow operativo**: [evaluación]
-- **Endeudamiento**: [comparación ratios deuda/capital]
+            ### 💰 Flujo de Efectivo
+            - **Cash Flow operativo**: [evaluación]
+            - **Endeudamiento**: [comparación ratios deuda/capital]
 
-### ⚖️ Análisis de Riesgo
-- **Beta promedio**: [valor + interpretación riesgo]
+            ### ⚖️ Análisis de Riesgo
+            - **Beta promedio**: [valor + interpretación riesgo]
 
-### 💎 Dividendos
-- **Mejores yields**: [empresas con mayor rentabilidad]
-- **Frecuencia**: [regularidad de pagos]
+            ### 💎 Dividendos
+            - **Mejores yields**: [empresas con mayor rentabilidad]
+            - **Frecuencia**: [regularidad de pagos]
 
-### 🎯 Recomendaciones
-- **Top empresas**: [3–5 mejores opciones]
-- **Estrategia**: [sugerencia de diversificación breve]
-"""
+            ### 🎯 Recomendaciones
+            - **Top empresas**: [3–5 mejores opciones]
+            - **Estrategia**: [sugerencia de diversificación breve]
+            """
             
             completion = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_tokens=500,
                 temperature=0.7
@@ -817,63 +817,63 @@ Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las
             
             # Crear prompt personalizado con perfil de riesgo
             task_prompt = f"""
-Eres un **asesor financiero experto en portafolios de la bolsa chilena**.
-Debes asignar **EXACTAMENTE** el presupuesto disponible conforme al perfil de riesgo, usando una distribución **ponderada, no equitativa**.
+            Eres un **asesor financiero experto en portafolios de la bolsa chilena**.
+            Debes asignar **EXACTAMENTE** el presupuesto disponible conforme al perfil de riesgo, usando una distribución **ponderada, no equitativa**.
 
-IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO muestres pasos intermedios, ni tablas de validación, ni listas de verificación**. Solo entrega la **salida final** en el formato exacto pedido.
+            IMPORTANTE: Realiza toda la clasificación y validación internamente. **NO muestres pasos intermedios, ni tablas de validación, ni listas de verificación**. Solo entrega la **salida final** en el formato exacto pedido.
 
-### Perfil del Cliente
-- Nivel de Riesgo: {risk_level.upper()}
-- Estrategia: {risk_strategy['description']}
-- Número de empresas deseadas: {num_companies}
-- Enfoque en dividendos: {risk_strategy['min_dividend_focus']}
-- Diversificación: {risk_strategy['diversification']} (máx. 2 empresas por sector)
+            ### Perfil del Cliente
+            - Nivel de Riesgo: {risk_level.upper()}
+            - Estrategia: {risk_strategy['description']}
+            - Número de empresas deseadas: {num_companies}
+            - Enfoque en dividendos: {risk_strategy['min_dividend_focus']}
+            - Diversificación: {risk_strategy['diversification']} (máx. 2 empresas por sector)
 
-### Datos de entrada
-- Informe Financiero:
-{gpt_analysis}
+            ### Datos de entrada
+            - Informe Financiero:
+            {gpt_analysis}
 
-- Distribución de Pesos Calculados (obligatorio: columna 'ticker' y preferible 'sector', 'weight', 'roe', 'yield', 'perf_6m'):
-{portfolio_weights.to_string()}
+            - Distribución de Pesos Calculados (obligatorio: columna 'ticker' y preferible 'sector', 'weight', 'roe', 'yield', 'perf_6m'):
+            {portfolio_weights.to_string()}
 
-- Presupuesto total: ${budget:,}
+            - Presupuesto total: ${budget:,}
 
-### REGLAS OBLIGATORIAS (IMPRESCINDIBLES)
-1. TOTAL EXACTO: ${budget:,}.
-2. Exactamente {num_companies} empresas.
-3. **MÁXIMO 2 EMPRESAS POR SECTOR.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
-4. MÍNIMO POR EMPRESA: $20,000. **NO SE PERMITEN EXCEPCIONES.** Si algún ticker quedara por debajo, **reemplazar inmediatamente por otro ticker disponible** y ajustar los montos de los demás para cumplir TOTAL EXACTO.
-5. Montos en múltiplos de $1,000, respetando el mínimo.
-6. Solo usar tickers listados en "Distribución de Pesos Calculados".
-7. No mostrar validaciones ni pasos intermedios, solo la salida final.
-8. Si no es posible cumplir todas las reglas, devuelve únicamente:  
-   `NO ES POSIBLE CUMPLIR RESTRICCIONES` (máx. 2 líneas explicando por qué).
-9. Responde en máximo 350–450 tokens.
+            ### REGLAS OBLIGATORIAS (IMPRESCINDIBLES)
+            1. TOTAL EXACTO: ${budget:,}.
+            2. Exactamente {num_companies} empresas.
+            3. **MÁXIMO 2 EMPRESAS POR SECTOR.** No se permite excepción bajo ninguna circunstancia. Si hay más, **descartar automáticamente las de menor score y reemplazar por tickers de otros sectores disponibles**.
+            4. MÍNIMO POR EMPRESA: $20,000. **NO SE PERMITEN EXCEPCIONES.** Si algún ticker quedara por debajo, **reemplazar inmediatamente por otro ticker disponible** y ajustar los montos de los demás para cumplir TOTAL EXACTO.
+            5. Montos en múltiplos de $1,000, respetando el mínimo.
+            6. Solo usar tickers listados en "Distribución de Pesos Calculados".
+            7. No mostrar validaciones ni pasos intermedios, solo la salida final.
+            8. Si no es posible cumplir todas las reglas, devuelve únicamente:  
+            `NO ES POSIBLE CUMPLIR RESTRICCIONES` (máx. 2 líneas explicando por qué).
+            9. Responde en máximo 350–450 tokens.
 
-### LÓGICA APLICADA (EJECUTAR INTERNAMENTE, NO MOSTRAR)
-1. Primero, filtrar candidatos por sector para **RESPETAR MÁXIMO 2 POR SECTOR**.
-2. Luego, ordenar por score (usar weight/roe/yield/perf_6m si existen).
-3. Seleccionar top {num_companies} dentro de las restricciones de sector.
-4. Asignar montos proporcionales al score, imponiendo mínimo $20,000 y redondeando a múltiplos de $1,000.
-5. Ajustar incrementalmente (± $1,000), respetando el mínimo por empresa, hasta que TOTAL == ${budget:,}.
-6. Reemplazar cualquier ticker que no cumpla límite de sector automáticamente.
+            ### LÓGICA APLICADA (EJECUTAR INTERNAMENTE, NO MOSTRAR)
+            1. Primero, filtrar candidatos por sector para **RESPETAR MÁXIMO 2 POR SECTOR**.
+            2. Luego, ordenar por score (usar weight/roe/yield/perf_6m si existen).
+            3. Seleccionar top {num_companies} dentro de las restricciones de sector.
+            4. Asignar montos proporcionales al score, imponiendo mínimo $20,000 y redondeando a múltiplos de $1,000.
+            5. Ajustar incrementalmente (± $1,000), respetando el mínimo por empresa, hasta que TOTAL == ${budget:,}.
+            6. Reemplazar cualquier ticker que no cumpla límite de sector automáticamente.
 
-### SALIDA (SOLO ESTO)
-### 📊 Distribución de Inversión ({risk_level.capitalize()})
-- TICKER | SECTOR : $ [dinero]
-- ...
+            ### SALIDA (SOLO ESTO)
+            ### 📊 Distribución de Inversión ({risk_level.capitalize()})
+            - TICKER | SECTOR : $ [dinero]
+            - ...
 
-**TOTAL: $ {budget:,}**
+            **TOTAL: $ {budget:,}**
 
-### 📝 Justificación (no tan extenso)
-- [Explicación de la coherencia con el perfil de riesgo con las empresas seleccionadas]
-- [Explicación de la diversificación lograda, sectores cubiertos, etc.]
-- [Explicación de empresas seleccionadas, fortalezas, enfoque en dividendos o crecimiento según perfil]
+            ### 📝 Justificación (no tan extenso)
+            - [Explicación de la coherencia con el perfil de riesgo con las empresas seleccionadas]
+            - [Explicación de la diversificación lograda, sectores cubiertos, etc.]
+            - [Explicación de empresas seleccionadas, fortalezas, enfoque en dividendos o crecimiento según perfil]
 
-"""
+            """
             
             completion = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_tokens=600,
                 temperature=0.3
