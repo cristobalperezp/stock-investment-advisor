@@ -756,7 +756,7 @@ class InvestmentAnalyzer:
                 model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_completion_tokens=500,
-                temperature=0.7
+                # temperature=0.7
             )
             
             return completion.choices[0].message.content
@@ -876,7 +876,7 @@ class InvestmentAnalyzer:
                 model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
                 max_completion_tokens=600,
-                temperature=0.3
+                # temperature=0.3
             )
             
             gpt_response = completion.choices[0].message.content
