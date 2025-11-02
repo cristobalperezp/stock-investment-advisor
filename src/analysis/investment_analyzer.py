@@ -762,7 +762,7 @@ class InvestmentAnalyzer:
 
             response = client.responses.create(
                 model="gpt-5-mini",
-                reasoning={"effort": "medium"},
+                # reasoning={"effort": "medium"},
                 instructions="Eres un analista financiero senior especializado en la bolsa chilena y debes responder solo con el formato solicitado.",
                 input=task_prompt,
                 max_output_tokens=600,
@@ -770,7 +770,13 @@ class InvestmentAnalyzer:
             
             gpt_response = response.output_text
 
-            logger.info(f"Respuesta GPT cruda:\n{gpt_response[:500]}")
+            # Debug completo
+            logger.info(f"===== DEBUG GPT-5 =====")
+            logger.info(f"Tipo respuesta: {type(response)}")
+            logger.info(f"Respuesta completa: {response}")
+            logger.info(f"output_text: '{gpt_response}'")
+            logger.info(f"Longitud: {len(gpt_response) if gpt_response else 0}")
+            logger.info(f"=======================")
 
             
             # return completion.choices[0].message.content
@@ -898,7 +904,7 @@ class InvestmentAnalyzer:
 
             response = client.responses.create(
                 model="gpt-5-mini",
-                reasoning={"effort": "medium"},
+                # reasoning={"effort": "medium"},
                 instructions="Eres un asesor financiero senior especializado en la bolsa chilena y debes responder solo con el formato solicitado.",
                 input=task_prompt,
                 max_output_tokens=600,
@@ -906,7 +912,13 @@ class InvestmentAnalyzer:
             
             gpt_response = response.output_text
 
-            logger.info(f"Respuesta GPT cruda:\n{gpt_response[:500]}")
+            # Debug completo
+            logger.info(f"===== DEBUG GPT-5 =====")
+            logger.info(f"Tipo respuesta: {type(response)}")
+            logger.info(f"Respuesta completa: {response}")
+            logger.info(f"output_text: '{gpt_response}'")
+            logger.info(f"Longitud: {len(gpt_response) if gpt_response else 0}")
+            logger.info(f"=======================")
             
             # NUEVA FUNCIONALIDAD: Validar y corregir la suma automáticamente
             corrected_response = self._validate_and_fix_gpt_budget(gpt_response, budget)
