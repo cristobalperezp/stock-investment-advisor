@@ -920,12 +920,6 @@ class InvestmentAnalyzer:
             
             # NUEVA FUNCIONALIDAD: Validar y corregir la suma automáticamente
             corrected_response = self._validate_and_fix_gpt_budget(gpt_response, budget)
-            
-            if not corrected_response or corrected_response == gpt_response:
-                logger.warning("GPT no devolvió formato parseable, usando fallback")
-                return self._generate_fallback_distribution(
-                    portfolio_weights, budget, risk_level, num_companies
-                )
 
             return corrected_response
             
