@@ -752,14 +752,35 @@ class InvestmentAnalyzer:
             - **Estrategia**: [sugerencia de diversificación breve]
             """
             
-            completion = client.chat.completions.create(
+            # completion = client.chat.completions.create(
+            #     model="gpt-5-mini",
+            #     messages=[{"role": "user", "content": task_prompt}],
+            #     max_completion_tokens=500,
+            #     # temperature=0.7
+            # )
+
+
+            response = client.responses.create(
                 model="gpt-5-mini",
-                messages=[{"role": "user", "content": task_prompt}],
-                max_completion_tokens=500,
-                # temperature=0.7
+                reasoning={"effort": "medium"},
+                input=[
+                    {
+                        "role": "system",
+                        "content": "Eres un analista financiero y debes responder solo con el formato solicitado."
+                    },
+                    {
+                        "role": "user",
+                        "content": task_prompt
+                    }
+                ],
+                max_output_tokens=600,
             )
             
-            return completion.choices[0].message.content
+            gpt_response = response.output_text
+
+            
+            # return completion.choices[0].message.content
+            return gpt_response
             
         except Exception as e:
             logger.error(f"Error en análisis GPT: {str(e)}")
@@ -872,14 +893,32 @@ class InvestmentAnalyzer:
 
             """
             
-            completion = client.chat.completions.create(
+            # completion = client.chat.completions.create(
+            #     model="gpt-5-mini",
+            #     messages=[{"role": "user", "content": task_prompt}],
+            #     max_completion_tokens=600,
+            #     # temperature=0.3
+            # )
+            
+            # gpt_response = completion.choices[0].message.content
+
+            response = client.responses.create(
                 model="gpt-5-mini",
-                messages=[{"role": "user", "content": task_prompt}],
-                max_completion_tokens=600,
-                # temperature=0.3
+                reasoning={"effort": "medium"},
+                input=[
+                    {
+                        "role": "system",
+                        "content": "Eres un asesor financiero y debes responder solo con el formato solicitado."
+                    },
+                    {
+                        "role": "user",
+                        "content": task_prompt
+                    }
+                ],
+                max_output_tokens=600,
             )
             
-            gpt_response = completion.choices[0].message.content
+            gpt_response = response.output_text
             
             # NUEVA FUNCIONALIDAD: Validar y corregir la suma automáticamente
             corrected_response = self._validate_and_fix_gpt_budget(gpt_response, budget)
