@@ -770,6 +770,8 @@ class InvestmentAnalyzer:
             
             gpt_response = response.output_text
 
+            logger.info(f"Respuesta GPT cruda:\n{gpt_response[:500]}")
+
             
             # return completion.choices[0].message.content
             return gpt_response
