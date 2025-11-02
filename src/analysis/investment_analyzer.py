@@ -762,10 +762,9 @@ class InvestmentAnalyzer:
 
             response = client.responses.create(
                 model="gpt-5-mini",
-                # reasoning={"effort": "medium"},
-                instructions="Eres un analista financiero senior especializado en la bolsa chilena y debes responder solo con el formato solicitado.",
-                input=task_prompt,
-                max_output_tokens=600,
+                reasoning={"effort": "medium"},
+                input=[{"role": "user", "content": task_prompt}],
+                # max_output_tokens=600,
             )
             
             gpt_response = response.output_text
@@ -904,10 +903,9 @@ class InvestmentAnalyzer:
 
             response = client.responses.create(
                 model="gpt-5-mini",
-                # reasoning={"effort": "medium"},
-                instructions="Eres un asesor financiero senior especializado en la bolsa chilena y debes responder solo con el formato solicitado.",
-                input=task_prompt,
-                max_output_tokens=600,
+                reasoning={"effort": "medium"},
+                input=[{"role": "user", "content": task_prompt}],
+                # max_output_tokens=600,
             )
             
             gpt_response = response.output_text
