@@ -885,7 +885,7 @@ class InvestmentAnalyzer:
 
             **TOTAL: $ {budget:,}**
 
-            ### 📝 Justificación (no tan extenso)
+            ### 📝 Justificación
             - [Explicación de la coherencia con el perfil de riesgo con las empresas seleccionadas]
             - [Explicación de la diversificación lograda, sectores cubiertos, etc.]
             - [Explicación de empresas seleccionadas, fortalezas, enfoque en dividendos o crecimiento según perfil]
