@@ -755,7 +755,7 @@ class InvestmentAnalyzer:
             completion = client.chat.completions.create(
                 model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
-                max_tokens=500,
+                max_completion_tokens=500,
                 temperature=0.7
             )
             
@@ -875,7 +875,7 @@ class InvestmentAnalyzer:
             completion = client.chat.completions.create(
                 model="gpt-5-mini",
                 messages=[{"role": "user", "content": task_prompt}],
-                max_tokens=600,
+                max_completion_tokens=600,
                 temperature=0.3
             )
             
