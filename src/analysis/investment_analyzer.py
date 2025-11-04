@@ -13,6 +13,7 @@ import logging
 import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from toon import encode
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -717,7 +718,7 @@ class InvestmentAnalyzer:
             Eres un **analista financiero senior** especializado en la bolsa chilena. 
             Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las siguientes empresas:
 
-            {df_dividends.to_string()}
+            {encode(df_dividends)}
 
             ### Instrucciones:
             - Usa formato **Markdown estructurado**, con los mismos títulos y subtítulos indicados abajo.
@@ -854,7 +855,8 @@ class InvestmentAnalyzer:
             {gpt_analysis}
 
             - Distribución de Pesos Calculados (obligatorio: columna 'ticker' y preferible 'sector', 'weight', 'roe', 'yield', 'perf_6m'):
-            {portfolio_weights.to_string()}
+            
+            {encode(portfolio_weights.to_dict(orient='records'))}
 
             - Presupuesto total: ${budget:,}
 
