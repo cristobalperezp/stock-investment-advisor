@@ -7,6 +7,7 @@ import streamlit as st
 import sys
 import pandas as pd
 import traceback
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -376,6 +377,11 @@ def show_portfolio_distribution(result):
 
 def show_gpt_analysis(result):
     """Muestra los análisis específicos de GPT"""
+    api_key_available = bool(os.getenv("OPENAI_API_KEY"))
+    status_text = "✅ OPENAI_API_KEY detectada en el entorno" if api_key_available else "⚠️ OPENAI_API_KEY no encontrada en variables de entorno"
+    status_fn = st.info if api_key_available else st.error
+    status_fn(status_text)
+    
     # Verificar si hay análisis GPT disponible
     if 'gpt_analysis' in result and result['gpt_analysis'] and not result['gpt_analysis'].startswith('### 📊 Informe Financiero (Análisis Automatizado)'):
         st.success("✅ Análisis realizado con inteligencia artificial")
