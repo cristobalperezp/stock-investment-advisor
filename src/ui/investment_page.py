@@ -7,6 +7,7 @@ import streamlit as st
 import sys
 import pandas as pd
 import traceback
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -421,7 +422,6 @@ def show_gpt_analysis(result):
                 gpt_text = result['gpt_distribution']
                 if gpt_text:
                     # Buscar líneas con TOTAL de forma más flexible
-                    import re
                     lines = gpt_text.split('\n')
                     
                     # Buscar líneas con TOTAL usando regex más flexible
@@ -441,18 +441,15 @@ def show_gpt_analysis(result):
                 
                 # Contar empresas mencionadas de forma más precisa
                 if gpt_text:
-                    lines = gpt_text.split('\n')
-                    investment_lines = [
-                        line for line in lines
-                        if line.strip().startswith('- ') and '$' in line
-                    ]
-                    if not investment_lines:
-                        investment_lines = [
-                            line for line in lines
-                            if '|' in line and '$' in line and not line.strip().upper().startswith('TOTAL')
-                        ]
-                    empresa_count = len(investment_lines)
-                    st.metric("Empresas sugeridas (IA)", empresa_count if empresa_count > 0 else "N/A")
+                    investment_pattern = re.compile(
+                        r'^\s*(?:[-•]\s*)?([A-Z0-9\-]+\.SN)\b.*?\$\s*[\d,]+',
+                        re.MULTILINE
+                    )
+                    matches = investment_pattern.findall(gpt_text)
+                    if matches:
+                        st.metric("Empresas sugeridas (IA)", len(matches))
+                    else:
+                        st.metric("Empresas sugeridas (IA)", "N/A")
                 else:
                     st.metric("Empresas sugeridas (IA)", "N/A")
             else:
