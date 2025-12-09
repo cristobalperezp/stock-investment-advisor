@@ -11,6 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime, timedelta
 import logging
 import os
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from toon import encode
@@ -713,12 +714,39 @@ class InvestmentAnalyzer:
                 "Frecuencia_Dividendos"
             ]]
             
+            # Preparar datos serializables antes de pasarlos a toon.encode
+            df_dividends_clean = df_dividends.copy()
+            if "Ultimos_Dividendos" in df_dividends_clean.columns:
+                df_dividends_clean["Ultimos_Dividendos"] = df_dividends_clean[
+                    "Ultimos_Dividendos"
+                ].apply(
+                    lambda values: ", ".join(str(v) for v in values)
+                    if isinstance(values, (list, tuple)) and len(values) > 0
+                    else "No disponible"
+                )
+            if "Frecuencia_Dividendos" in df_dividends_clean.columns:
+                df_dividends_clean["Frecuencia_Dividendos"] = df_dividends_clean[
+                    "Frecuencia_Dividendos"
+                ].apply(
+                    lambda value: str(value) if pd.notna(value) else "No disponible"
+                )
+            
+            df_dividends_clean = df_dividends_clean.fillna("No disponible")
+            data_records = json.loads(df_dividends_clean.to_json(orient="records"))
+            
+            try:
+                formatted_data = encode(data_records)
+                if not formatted_data or formatted_data.strip().lower() == "null":
+                    formatted_data = json.dumps(data_records, indent=2)[:4000]
+            except Exception:
+                formatted_data = json.dumps(data_records, indent=2)[:4000]
+            
             # Crear prompt para GPT con formato Markdown
             task_prompt = f"""
             Eres un **analista financiero senior** especializado en la bolsa chilena. 
             Tu tarea es evaluar de manera **objetiva, breve y comparativa** los datos de las siguientes empresas:
 
-            {encode(df_dividends)}
+            {formatted_data}
 
             ### Instrucciones:
             - Usa formato **Markdown estructurado**, con los mismos títulos y subtítulos indicados abajo.

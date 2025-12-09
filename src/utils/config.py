@@ -8,8 +8,18 @@ import os
 from typing import Dict, Any, List
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+# Cargar variables desde archivo .env si existe
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+dotenv_path = PROJECT_ROOT / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
+    logger.info(f"Variables de entorno cargadas desde: {dotenv_path}")
+else:
+    logger.warning(f"Archivo .env no encontrado en {dotenv_path}, se usarán variables del entorno del sistema")
 
 
 class ConfigManager:

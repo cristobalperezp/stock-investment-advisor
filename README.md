@@ -136,6 +136,28 @@ streamlit run src/ui/streamlit_app.py
 
 Acceder a: **http://localhost:8501**
 
+### 1.1 Ejecutar análisis rápido desde la terminal
+El script `scripts/run_analysis.sh` carga automáticamente el `.env`, ejecuta el análisis TOP acciones y muestra las recomendaciones en consola:
+
+```bash
+chmod +x scripts/run_analysis.sh  # una sola vez
+./scripts/run_analysis.sh [presupuesto] [riesgo] [dividendos] [top]
+```
+
+Ejemplo:
+
+```bash
+./scripts/run_analysis.sh 5000000 agresivo true 5
+```
+
+Argumentos (opcionales):
+- `presupuesto`: CLP totales a invertir (default `1000000`)
+- `riesgo`: `conservador | moderado | agresivo` (default `moderado`)
+- `dividendos`: `true | false` para priorizar pagos (default `true`)
+- `top`: número de acciones finales (default `10`)
+
+El script guarda/actualiza los CSV en `data/processed/` igual que la app y requiere conexión a internet para bajar datos frescos de Yahoo Finance.
+
 ### 2. Ejecutar Análisis Manual
 ```bash
 # Análisis fundamental completo
@@ -455,6 +477,5 @@ Este proyecto está bajo la Licencia **MIT**. Ver `LICENSE` para más detalles.
 **Desarrollador**: Cristóbal Pérez P.  
 **Email**: cristobal.perez.p99@gmail.com  
 **LinkedIn**: [Cristóbal Pérez P.](https://www.linkedin.com/in/cristobal-perez-palma/)
-
 
 
