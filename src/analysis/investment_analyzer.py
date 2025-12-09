@@ -1368,12 +1368,12 @@ class InvestmentAnalyzer:
                 df_fundamentals_filtered = df_fundamentals
                 logger.info(f"Usando todas las {len(portfolio_weights)} acciones disponibles")
             
-            # 4. Generar análisis con GPT (todas las acciones disponibles)
-            gpt_analysis = self.business_analyst_gpt(df_fundamentals)
+            # 4. Generar análisis con GPT usando únicamente las TOP seleccionadas
+            gpt_analysis = self.business_analyst_gpt(df_fundamentals_filtered)
             
-            # 5. Generar distribución con GPT (TODAS las acciones disponibles)
+            # 5. Generar distribución con GPT alineada con las TOP seleccionadas
             gpt_distribution = self.financial_advisor_gpt(
-                gpt_analysis, portfolio_weights, budget,
+                gpt_analysis, top_portfolio_weights, budget,
                 risk_level, top_stocks_count
             )
             

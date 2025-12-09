@@ -7,7 +7,6 @@ import streamlit as st
 import sys
 import pandas as pd
 import traceback
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -377,11 +376,6 @@ def show_portfolio_distribution(result):
 
 def show_gpt_analysis(result):
     """Muestra los análisis específicos de GPT"""
-    api_key_available = bool(os.getenv("OPENAI_API_KEY"))
-    status_text = "✅ OPENAI_API_KEY detectada en el entorno" if api_key_available else "⚠️ OPENAI_API_KEY no encontrada en variables de entorno"
-    status_fn = st.info if api_key_available else st.error
-    status_fn(status_text)
-    
     # Verificar si hay análisis GPT disponible
     if 'gpt_analysis' in result and result['gpt_analysis'] and not result['gpt_analysis'].startswith('### 📊 Informe Financiero (Análisis Automatizado)'):
         st.success("✅ Análisis realizado con inteligencia artificial")
@@ -447,12 +441,18 @@ def show_gpt_analysis(result):
                 
                 # Contar empresas mencionadas de forma más precisa
                 if gpt_text:
-                    # Contar líneas que empiezan con "- " y contienen "$"
-                    investment_lines = [line for line in gpt_text.split('\n') if line.strip().startswith('- ') and '$' in line]
+                    lines = gpt_text.split('\n')
+                    investment_lines = [
+                        line for line in lines
+                        if line.strip().startswith('- ') and '$' in line
+                    ]
+                    if not investment_lines:
+                        investment_lines = [
+                            line for line in lines
+                            if '|' in line and '$' in line and not line.strip().upper().startswith('TOTAL')
+                        ]
                     empresa_count = len(investment_lines)
-                    st.metric("Empresas sugeridas (IA)", empresa_count)
-                    
-
+                    st.metric("Empresas sugeridas (IA)", empresa_count if empresa_count > 0 else "N/A")
                 else:
                     st.metric("Empresas sugeridas (IA)", "N/A")
             else:
