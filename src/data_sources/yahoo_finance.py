@@ -182,7 +182,8 @@ class YahooFinanceDataExtractor:
         Returns:
             tuple: (cached_dataframe, missing_symbols_list)
         """
-        cache_files = list(self.cache_dir.glob("current_prices_*_20250908.csv"))
+        today = datetime.now().strftime('%Y%m%d')
+        cache_files = list(self.cache_dir.glob(f"current_prices_*_{today}.csv"))
         
         best_match = None
         best_coverage = 0
@@ -265,7 +266,11 @@ class YahooFinanceDataExtractor:
             cache_filename = self._get_cache_filename("current_prices", symbols_str)
             self._save_to_cache(df, cache_filename)
         
-        return df.sort_values('change_percent', ascending=False)
+        if df.empty or 'change_percent' not in df.columns:
+            logger.warning("No se pudieron calcular variaciones para los símbolos proporcionados")
+            return df.reset_index(drop=True)
+        
+        return df.sort_values('change_percent', ascending=False).reset_index(drop=True)
     
     def get_historical_data(self, symbol: str, period: str = "1y") -> pd.DataFrame:
         """
@@ -355,7 +360,8 @@ class YahooFinanceDataExtractor:
         """
         Busca en el caché histórico y determina qué acciones faltan
         """
-        cache_pattern = f"historical_{period}_*_20250908.csv"
+        today = datetime.now().strftime('%Y%m%d')
+        cache_pattern = f"historical_{period}_*_{today}.csv"
         cache_files = list(self.cache_dir.glob(cache_pattern))
         
         best_match = None
