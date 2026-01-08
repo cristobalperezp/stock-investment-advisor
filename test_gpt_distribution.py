@@ -8,11 +8,26 @@ import sys
 import os
 from pathlib import Path
 
-# Agregar src al path
-src_path = Path(__file__).parent / "src"
-sys.path.append(str(src_path))
+from dotenv import load_dotenv
 
-from analysis.investment_analyzer import InvestmentAnalyzer
+# Configurar paths del proyecto para imports absolutos
+ROOT_DIR = Path(__file__).resolve().parent
+SRC_DIR = ROOT_DIR / "src"
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+# Asegurar que la ejecución use la raíz del proyecto y que existan directorios requeridos
+if Path.cwd() != ROOT_DIR:
+    os.chdir(ROOT_DIR)
+
+(ROOT_DIR / "data" / "processed").mkdir(parents=True, exist_ok=True)
+
+# Cargar variables de entorno (incluye OPENAI_API_KEY) desde .env si existe
+load_dotenv(dotenv_path=ROOT_DIR / ".env", override=False)
+
+from src.analysis.investment_analyzer import InvestmentAnalyzer
 
 def test_gpt_distribution():
     """Test básico de la distribución GPT"""
@@ -32,13 +47,18 @@ def test_gpt_distribution():
         
         print("✅ OpenAI API Key encontrada")
         
+        # Refrescar datos fundamentales antes de generar recomendaciones
+        print("📥 Actualizando datos fundamentales de las acciones...")
+        fresh_data = analyzer.download_all_fundamental_data()
+        print(f"✅ Datos actualizados para {len(fresh_data)} acciones\n")
+        
         # Ejecutar análisis con GPT
         print("🔄 Ejecutando análisis con GPT...")
         result = analyzer.run_complete_analysis_with_gpt(
-            budget=200000,  # Presupuesto pequeño para prueba rápida
+            budget=220000,  # Presupuesto pequeño para prueba rápida
             risk_level="agresivo",
             dividend_preference=True,
-            top_stocks_count=7  # 7 empresas para test
+            top_stocks_count=6  # 7 empresas para test
         )
         
         # Verificar resultados
