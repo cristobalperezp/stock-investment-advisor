@@ -455,6 +455,55 @@ class InvestmentAnalyzer:
             
             self.portfolio_weights = puntajes_df
             return puntajes_df
+
+    def _select_top_diversified_stocks(
+        self,
+        portfolio_weights: pd.DataFrame,
+        top_count: int,
+        max_per_sector: int = 2
+    ) -> pd.DataFrame:
+        """
+        Selecciona las mejores acciones respetando un máximo de empresas por sector.
+        Esto evita enviar a GPT combinaciones que violen las reglas de diversificación.
+        """
+        if portfolio_weights.empty:
+            return portfolio_weights
+        
+        sorted_df = portfolio_weights.sort_values(
+            by='Puntaje', ascending=False
+        )
+        selected_indices: List[int] = []
+        sector_counts: Dict[str, int] = {}
+        
+        for idx, row in sorted_df.iterrows():
+            sector = row.get('Sector', 'Otros')
+            if sector_counts.get(sector, 0) >= max_per_sector:
+                continue
+            
+            selected_indices.append(idx)
+            sector_counts[sector] = sector_counts.get(sector, 0) + 1
+            
+            if len(selected_indices) == top_count:
+                break
+        
+        # Si no se alcanzó el total deseado (por falta de sectores), completar con mejores restantes
+        if len(selected_indices) < min(top_count, len(sorted_df)):
+            remaining = sorted_df.drop(index=selected_indices, errors='ignore')
+            for idx in remaining.index:
+                selected_indices.append(idx)
+                if len(selected_indices) == top_count:
+                    break
+        
+        selected_df = sorted_df.loc[selected_indices].copy()
+        selected_df.reset_index(drop=True, inplace=True)
+        
+        logger.info(
+            f"Seleccionadas {len(selected_df)} acciones respetando máximo "
+            f"{max_per_sector} por sector"
+        )
+        logger.info(f"Distribución por sector: {sector_counts}")
+        
+        return selected_df
     
     def generate_investment_recommendations(self, 
                                           budget: float = 1000000,
@@ -1350,18 +1399,19 @@ class InvestmentAnalyzer:
             
             # 3. NUEVA FUNCIONALIDAD: Seleccionar TOP X acciones basado en puntajes
             if len(portfolio_weights) > top_stocks_count:
-                # Ordenar por puntuación y seleccionar TOP X
-                top_portfolio_weights = portfolio_weights.nlargest(
-                    top_stocks_count, 'Puntaje'
-                ).copy()
+                top_portfolio_weights = self._select_top_diversified_stocks(
+                    portfolio_weights, top_stocks_count, max_per_sector=2
+                )
                 
-                # Filtrar datos fundamentales para TOP X acciones solamente
                 top_tickers = top_portfolio_weights['Ticker'].tolist()
                 df_fundamentals_filtered = df_fundamentals[
                     df_fundamentals['Ticker'].isin(top_tickers)
                 ].copy()
                 
-                logger.info(f"Seleccionadas TOP {top_stocks_count} acciones: {top_tickers}")
+                logger.info(
+                    f"Seleccionadas TOP {top_stocks_count} acciones (diversificadas): "
+                    f"{top_tickers}"
+                )
             else:
                 # Si hay pocas acciones disponibles, usar todas
                 top_portfolio_weights = portfolio_weights
