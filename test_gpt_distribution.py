@@ -58,7 +58,7 @@ def test_gpt_distribution():
             budget=200000,  # Presupuesto pequeño para prueba rápida
             risk_level="agresivo",
             dividend_preference=True,
-            top_stocks_count=6  # 7 empresas para test
+            top_stocks_count=6  # 6 empresas para test
         )
         
         # Verificar resultados
