@@ -55,7 +55,7 @@ def test_gpt_distribution():
         # Ejecutar análisis con GPT
         print("🔄 Ejecutando análisis con GPT...")
         result = analyzer.run_complete_analysis_with_gpt(
-            budget=220000,  # Presupuesto pequeño para prueba rápida
+            budget=200000,  # Presupuesto pequeño para prueba rápida
             risk_level="agresivo",
             dividend_preference=True,
             top_stocks_count=6  # 7 empresas para test
